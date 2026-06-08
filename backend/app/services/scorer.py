@@ -1,7 +1,10 @@
 import os
 import json
+import time
 from dotenv import load_dotenv
 from langchain_ollama import ChatOllama
+from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage, AIMessage
 
 from app.models.schemas import ScoringResponse, CriterionScore, SimilarEssay
@@ -12,8 +15,13 @@ load_dotenv()
 
 # -------- Settings --------
 
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL    = os.getenv("OLLAMA_MODEL", "gemma3:4b")
+OLLAMA_BASE_URL    = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+OLLAMA_MODEL       = os.getenv("OLLAMA_MODEL", "mistral:7b")
+GROQ_API_KEY       = os.getenv("GROQ_API_KEY")
+GROQ_MODEL         = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_MODEL   = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
+PROVIDER           = os.getenv("PROVIDER", "ollama")
 
 # official IELTS minimum word counts
 MIN_WORDS = {1: 150, 2: 250}
@@ -34,14 +42,29 @@ LANGUAGE_MAP = {
 # -------- LLM --------
 
 def get_llm():
+    if PROVIDER == "groq":
+        print("Using Groq cloud provider...")
+        return ChatGroq(
+            api_key=GROQ_API_KEY,
+            model=GROQ_MODEL,
+            temperature=0.2,
+        )
+    if PROVIDER == "openrouter":
+        print("Using OpenRouter cloud provider...")
+        # OpenRouter is OpenAI-compatible — use ChatOpenAI with custom base URL
+        return ChatOpenAI(
+            api_key=OPENROUTER_API_KEY,
+            base_url="https://openrouter.ai/api/v1",
+            model=OPENROUTER_MODEL,
+            temperature=0.2,
+        )
+    # default to local Ollama
+    print("Using local Ollama provider...")
     return ChatOllama(
         model=OLLAMA_MODEL,
         base_url=OLLAMA_BASE_URL,
         temperature=0.2,
-        # low temperature for consistent, reliable scoring
     )
-
-
 # -------- Official IELTS rounding --------
 
 def official_ielts_round(score: float) -> float:
@@ -175,6 +198,9 @@ def score_essay(
     language: str = "en",
 ) -> ScoringResponse:
 
+    # ---- Start latency timer ----
+    start_time = time.time()
+
     # ---- Validate word count before calling LLM ----
     word_count = len(essay.split())
     min_words  = MIN_WORDS[task_type]
@@ -204,7 +230,8 @@ def score_essay(
     )
 
     # ---- Call LLM with retry ----
-    print(f"Scoring essay with {OLLAMA_MODEL}...")
+    model_name = GROQ_MODEL if PROVIDER == "groq" else OLLAMA_MODEL
+    print(f"Scoring essay with {model_name}...")
     llm      = get_llm()
     messages = [
         SystemMessage(content=system_prompt),
@@ -222,7 +249,7 @@ def score_essay(
             if attempt == 1:
                 raise ValueError("Model returned malformed JSON after 2 attempts.")
 
-    # ---- Calculate overall band ourselves using official IELTS rounding ----
+    # ---- Calculate overall band using official IELTS rounding ----
     raw_average  = (
         data["task_achievement"]["score"] +
         data["coherence_cohesion"]["score"] +
@@ -231,6 +258,10 @@ def score_essay(
     ) / 4
     overall_band = official_ielts_round(raw_average)
     print(f"Raw average: {raw_average:.3f} → Official band: {overall_band}")
+
+    # ---- Calculate latency ----
+    latency_ms = int((time.time() - start_time) * 1000)
+    print(f"Total latency: {latency_ms}ms")
 
     # ---- Build ScoringResponse ----
     similar_essay_models = [
@@ -249,6 +280,7 @@ def score_essay(
         grammatical_range_accuracy=CriterionScore(**data["grammatical_range_accuracy"]),
         overall_band=overall_band,
         overall_feedback=data["overall_feedback"],
+        latency_ms=latency_ms,
         similar_essays=similar_essay_models if similar_essay_models else None,
     )
 
@@ -288,7 +320,7 @@ Scoring Result:
 """
 
     # ---- Build message history ----
-    # Gemma has no memory — we pass full history every time
+    # model has no memory — we pass full history every time
     messages = [SystemMessage(content=system_prompt)]
     for msg in history:
         if msg["role"] == "user":
