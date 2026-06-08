@@ -33,6 +33,7 @@ class ScoringResponse(BaseModel):
     grammatical_range_accuracy: CriterionScore
     overall_band:              float
     overall_feedback:          str
+    latency_ms:                 int
     # None if RAG finds no similar essays
     similar_essays: Optional[list[SimilarEssay]] = None
 
