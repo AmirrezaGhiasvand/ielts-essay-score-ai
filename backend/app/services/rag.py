@@ -34,22 +34,40 @@ def get_vector_store():
 def retrieve_similar_essays(essay: str, task_type: int, n_results: int = 3) -> list[dict]:
     vector_store = get_vector_store()
 
-    # filter by task type so Task 1 only matches Task 1, same for Task 2
-    results = vector_store.similarity_search_with_relevance_scores(
+    # use MMR for diverse results
+    # fetch_k=20 means fetch 20 candidates then pick 3 most diverse
+    docs = vector_store.max_marginal_relevance_search(
         query=essay,
         k=n_results,
+        fetch_k=20,
         filter={"task_type": task_type},
     )
 
-    if not results:
+    if not docs:
         return []
 
+    # calculate cosine similarity manually using embeddings
+    embeddings    = get_embeddings()
+    query_vector  = embeddings.embed_query(essay)
+    doc_vectors   = embeddings.embed_documents([doc.page_content for doc in docs])
+
+    def cosine_similarity(a, b):
+        dot     = sum(x * y for x, y in zip(a, b))
+        norm_a  = sum(x ** 2 for x in a) ** 0.5
+        norm_b  = sum(x ** 2 for x in b) ** 0.5
+        if norm_a == 0 or norm_b == 0:
+            return 0.0
+        return dot / (norm_a * norm_b)
+
     similar = []
-    for doc, score in results:
-        similar.append({
-            "overall_band":     doc.metadata.get("overall_band"),
-            "examiner_comment": doc.metadata.get("examiner_comment", ""),
-            "similarity":       round(score, 3),
-        })
+    for doc, doc_vec in zip(docs, doc_vectors):
+        score = cosine_similarity(query_vector, doc_vec)
+        # only return essays that are actually similar
+        if score >= 0.4:
+            similar.append({
+                "overall_band":     doc.metadata.get("overall_band"),
+                "examiner_comment": doc.metadata.get("examiner_comment", ""),
+                "similarity":       round(score, 3),
+            })
 
     return similar
