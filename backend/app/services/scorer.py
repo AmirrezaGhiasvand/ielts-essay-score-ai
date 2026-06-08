@@ -204,7 +204,7 @@ def score_essay(
     )
 
     # ---- Call LLM with retry ----
-    print("Scoring essay with Gemma...")
+    print(f"Scoring essay with {OLLAMA_MODEL}...")
     llm      = get_llm()
     messages = [
         SystemMessage(content=system_prompt),
