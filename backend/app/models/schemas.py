@@ -12,7 +12,7 @@ class CriterionScore(BaseModel):
 class SimilarEssay(BaseModel):
     overall_band:     float
     examiner_comment: str
-    similarity:       float
+    
 
 
 # -------- LLM output — what the model returns --------
