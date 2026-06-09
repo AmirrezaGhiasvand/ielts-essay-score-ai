@@ -1,0 +1,74 @@
+{
+  "n_essays": 5,
+  "mae": 0.6,
+  "exact_match_rate": 0.2,
+  "within_0.5_rate": 0.6,
+  "avg_latency_ms": 107130,
+  "essays": [
+    {
+      "essay_id": 1,
+      "task_type": 1,
+      "human_band": 7.0,
+      "predicted_band": 7.5,
+      "difference": 0.5,
+      "within_0.5": true,
+      "latency_ms": 190577,
+      "task_achievement": 7.5,
+      "coherence_cohesion": 8.0,
+      "lexical_resource": 7.5,
+      "grammatical_range_accuracy": 7.0
+    },
+    {
+      "essay_id": 2,
+      "task_type": 2,
+      "human_band": 7.0,
+      "predicted_band": 7.0,
+      "difference": 0.0,
+      "within_0.5": true,
+      "latency_ms": 114248,
+      "task_achievement": 7.0,
+      "coherence_cohesion": 7.5,
+      "lexical_resource": 7.0,
+      "grammatical_range_accuracy": 6.5
+    },
+    {
+      "essay_id": 3,
+      "task_type": 2,
+      "human_band": 6.5,
+      "predicted_band": 7.5,
+      "difference": 1.0,
+      "within_0.5": false,
+      "latency_ms": 84379,
+      "task_achievement": 8.0,
+      "coherence_cohesion": 7.5,
+      "lexical_resource": 7.0,
+      "grammatical_range_accuracy": 7.5
+    },
+    {
+      "essay_id": 4,
+      "task_type": 2,
+      "human_band": 6.0,
+      "predicted_band": 7.0,
+      "difference": 1.0,
+      "within_0.5": false,
+      "latency_ms": 80678,
+      "task_achievement": 7.0,
+      "coherence_cohesion": 7.5,
+      "lexical_resource": 6.5,
+      "grammatical_range_accuracy": 7.0
+    },
+    {
+      "essay_id": 5,
+      "task_type": 1,
+      "human_band": 6.5,
+      "predicted_band": 7.0,
+      "difference": 0.5,
+      "within_0.5": true,
+      "latency_ms": 65768,
+      "task_achievement": 7.0,
+      "coherence_cohesion": 7.5,
+      "lexical_resource": 6.0,
+      "grammatical_range_accuracy": 6.5
+    }
+  ]
+}
