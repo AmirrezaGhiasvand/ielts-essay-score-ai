@@ -6,7 +6,7 @@ from app.models.schemas import (
     ChatRequest,
     ChatResponse,
 )
-from app.services.scorer import score_essay, chat_about_essay
+from app.services.chain import score_essay, chat_about_essay
 
 
 # -------- Settings --------
@@ -28,17 +28,12 @@ async def score(request: ScoringRequest):
         return result
 
     except ValueError as e:
-        # word count too low or malformed JSON after retries
+        # word count too low or structured output failed
         raise HTTPException(status_code=400, detail=str(e))
 
-    except json.JSONDecodeError:
-        # fallback for any unexpected JSON issues
-        raise HTTPException(
-            status_code=500,
-            detail="Model returned malformed response. Please try again.",
-        )
-
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -55,6 +50,8 @@ async def chat(request: ChatRequest):
         return ChatResponse(reply=reply)
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
