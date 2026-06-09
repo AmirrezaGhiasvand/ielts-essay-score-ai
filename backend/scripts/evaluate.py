@@ -10,6 +10,8 @@ import traceback
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
+PROVIDER = os.getenv("PROVIDER", "ollama")
+
 from app.services.chain import score_essay
 from app.services.chain import get_vector_store
 
@@ -94,6 +96,11 @@ def evaluate():
                 "task_type": int(row["task_type"]),
                 "error":     str(e),
             })
+        
+        # respect rate limits for cloud providers
+        if PROVIDER in ("groq", "openrouter") and i < N_ESSAYS:
+            print(f"Waiting 35s for rate limit...")
+            time.sleep(35)
 
     # ---- Calculate metrics ----
     valid = [r for r in results if "error" not in r]
