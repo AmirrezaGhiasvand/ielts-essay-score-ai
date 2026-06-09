@@ -1,4 +1,5 @@
 import os
+import json
 import time
 from dotenv import load_dotenv
 from langchain_ollama import ChatOllama, OllamaEmbeddings
@@ -6,15 +7,13 @@ from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
 from langchain_chroma import Chroma
 from langchain.prompts import ChatPromptTemplate
-from langchain.schema import Document
-from langchain.schema.runnable import RunnablePassthrough
+from langchain.schema import Document, HumanMessage, AIMessage
 from langchain.schema.output_parser import StrOutputParser
 
 from app.models.schemas import (
     ScoringResponse,
     LLMScoringOutput,
     SimilarEssay,
-    CriterionScore,
 )
 
 load_dotenv()
@@ -75,34 +74,30 @@ def get_vector_store() -> Chroma:
     return _vector_store
 
 
-def get_llm(structured: bool = False):
+def get_llm():
     if PROVIDER == "groq":
         print("Using Groq cloud provider...")
-        llm = ChatGroq(
+        return ChatGroq(
             api_key=GROQ_API_KEY,
             model=GROQ_MODEL,
             temperature=0.2,
         )
     elif PROVIDER == "openrouter":
         print("Using OpenRouter cloud provider...")
-        llm = ChatOpenAI(
+        # OpenRouter is OpenAI-compatible — use ChatOpenAI with custom base URL
+        return ChatOpenAI(
             api_key=OPENROUTER_API_KEY,
             base_url="https://openrouter.ai/api/v1",
             model=OPENROUTER_MODEL,
             temperature=0.2,
         )
-    else:
-        print("Using local Ollama provider...")
-        llm = ChatOllama(
-            model=OLLAMA_MODEL,
-            base_url=OLLAMA_BASE_URL,
-            temperature=0.2,
-        )
-
-    # bind structured output schema for scoring
-    if structured:
-        return llm.with_structured_output(LLMScoringOutput)
-    return llm
+    # default to local Ollama
+    print("Using local Ollama provider...")
+    return ChatOllama(
+        model=OLLAMA_MODEL,
+        base_url=OLLAMA_BASE_URL,
+        temperature=0.2,
+    )
 
 
 # -------- Official IELTS rounding --------
@@ -200,6 +195,14 @@ IMPORTANT RULES:
 - Scores must be in 0.5 increments only (e.g. 5.0, 5.5, 6.0)
 - DO NOT calculate overall band
 - Respond in this language: {language}
+- Respond ONLY in this exact JSON format with no other text:
+{{
+    "task_achievement": {{"score": 0.0, "feedback": "..."}},
+    "coherence_cohesion": {{"score": 0.0, "feedback": "..."}},
+    "lexical_resource": {{"score": 0.0, "feedback": "..."}},
+    "grammatical_range_accuracy": {{"score": 0.0, "feedback": "..."}},
+    "overall_feedback": "..."
+}}
 """),
     ("human", """Task Type: Task {task_type}
 
@@ -248,17 +251,31 @@ def score_essay(
     print(f"Found {len(similar_docs)} similar essays")
 
     # ---- Build and run chain ----
-    print(f"Scoring essay with {OPENROUTER_MODEL if PROVIDER == 'openrouter' else OLLAMA_MODEL}...")
-    llm   = get_llm(structured=True)
-    chain = SCORING_PROMPT | llm
+    # use JSON parsing for all providers — with_structured_output behaves
+    # inconsistently across Ollama, Groq, and OpenRouter
+    model_name = OPENROUTER_MODEL if PROVIDER == "openrouter" else OLLAMA_MODEL
+    print(f"Scoring essay with {model_name}...")
 
-    result: LLMScoringOutput = chain.invoke({
+    llm   = get_llm()
+    chain = SCORING_PROMPT | llm | StrOutputParser()
+    raw   = chain.invoke({
         "task_type": task_type,
         "question":  question,
         "essay":     essay,
         "context":   context,
         "language":  LANGUAGE_MAP.get(language, "English"),
     })
+
+    # strip markdown code fences if model wraps response in them
+    raw = raw.strip()
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+    raw = raw.strip()
+
+    data   = json.loads(raw)
+    result = LLMScoringOutput(**data)
 
     # ---- Calculate overall band ----
     raw_average  = (
@@ -279,7 +296,6 @@ def score_essay(
         SimilarEssay(
             overall_band=doc.metadata.get("overall_band", 0.0),
             examiner_comment=doc.metadata.get("examiner_comment", ""),
-            similarity=0.0,  # MMR doesn't return scores, set to 0
         )
         for doc in similar_docs
     ]
@@ -296,7 +312,7 @@ def score_essay(
     )
 
 
-# -------- Follow-up chat --------
+# -------- Chat prompt --------
 
 CHAT_PROMPT = ChatPromptTemplate.from_messages([
     ("system", """You are an expert IELTS examiner helping a student improve their writing.
@@ -319,6 +335,8 @@ Scoring Result:
 ])
 
 
+# -------- Follow-up chat --------
+
 def chat_about_essay(
     essay:          str,
     scoring_result: ScoringResponse,
@@ -328,7 +346,7 @@ def chat_about_essay(
 ) -> str:
 
     language_name = LANGUAGE_MAP.get(language, "English")
-    llm           = get_llm(structured=False)
+    llm           = get_llm()
 
     # ---- Build messages with history ----
     # model has no memory — pass full history every time
@@ -349,7 +367,6 @@ def chat_about_essay(
     )
 
     # inject history between system and last human message
-    from langchain.schema import HumanMessage, AIMessage
     final_messages = [messages[0]]  # system
     for msg in history:
         if msg["role"] == "user":
