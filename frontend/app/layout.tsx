@@ -15,6 +15,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <head>
+        <link
+          href="https://cdn.jsdelivr.net/gh/rastikerdar/iran-sans-web@v5.0.0/dist/font-face.css"
+          rel="stylesheet"
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

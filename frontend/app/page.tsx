@@ -98,7 +98,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#0F1117]" dir={langInfo.dir}>
 
       {/* ---- Header ---- */}
-      <header className="border-b border-[#2A2D3A] bg-[#0F1117] px-6 py-3 flex items-center justify-between sticky top-0 z-20 backdrop-blur-sm">
+      <header className="border-b border-[#2A2D3A] bg-[#0F1117] px-6 py-4 flex items-center justify-between sticky top-0 z-20 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 bg-[#C8102E] rounded flex items-center justify-center flex-shrink-0">
             <span className="text-white font-bold text-[10px] tracking-wider">IE</span>
@@ -110,16 +110,16 @@ export default function Home() {
         </div>
 
         {/* ---- Language selector ---- */}
-        <div className="relative">
+        <div className="relative flex-shrink-0">
           <button
             onClick={() => setLangOpen(!langOpen)}
-            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 border border-[#2A2D3A] hover:border-[#3A3D4A] rounded-lg px-3 py-1.5 transition-colors"
+            className="flex items-center gap-2 text-sm text-slate-300 hover:text-white bg-[#1A1D27] border border-[#2A2D3A] hover:border-[#C8102E] rounded-lg px-4 py-2 transition-colors font-medium"
           >
             {LANGUAGES.find((l) => l.code === language)?.label}
             <ChevronDown size={11} />
           </button>
           {langOpen && (
-            <div className="absolute right-0 top-9 bg-[#1A1D27] border border-[#2A2D3A] rounded-xl shadow-2xl z-30 min-w-[150px] overflow-hidden">
+            <div className="absolute end-0 top-9 bg-[#1A1D27] border border-[#2A2D3A] rounded-xl shadow-2xl z-30 min-w-[150px] overflow-hidden">
               {LANGUAGES.map((lang) => (
                 <button
                   key={lang.code}
@@ -140,20 +140,20 @@ export default function Home() {
 
 
       {/* ---- Main ---- */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+      <main className="w-full px-6 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-[calc(100vh-64px)]">
 
 
           {/* ---- Left: Form ---- */}
           <div className="lg:col-span-2">
             <form
               onSubmit={handleSubmit(onSubmit)}
-              className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-5 space-y-4 sticky top-20"
+              className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-6 space-y-5 h-full flex flex-col"
             >
 
               {/* Task type */}
               <div className="space-y-2">
-                <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
                   {t.taskType}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -180,14 +180,14 @@ export default function Home() {
 
               {/* Question */}
               <div className="space-y-2">
-                <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
                   {t.question}
                 </label>
                 <textarea
                   {...register("question")}
                   placeholder={t.questionPlaceholder}
                   rows={3}
-                  className="w-full resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
+                  className="w-full resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] px-4 py-3 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
                 />
                 {errors.question && (
                   <p className="text-xs text-red-400">{errors.question.message}</p>
@@ -195,9 +195,9 @@ export default function Home() {
               </div>
 
               {/* Essay */}
-              <div className="space-y-2">
+              <div className="space-y-2 flex-1 flex flex-col">
                 <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
                     {t.essay}
                   </label>
                   <span className={`text-xs font-medium tabular-nums ${
@@ -215,8 +215,8 @@ export default function Home() {
                 <textarea
                   {...register("essay")}
                   placeholder={t.essayPlaceholder}
-                  rows={14}
-                  className="w-full resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] px-3 py-2 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors font-[var(--font-geist-mono)]"
+                  rows={10}
+                  className="w-full flex-1 resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] px-4 py-3 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors font-[var(--font-geist-mono)]"
                 />
                 {errors.essay && (
                   <p className="text-xs text-red-400">{errors.essay.message}</p>
@@ -234,7 +234,7 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={loading || !wordCountOk}
-                className="w-full bg-[#C8102E] text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-[#C8102E] text-white rounded-lg py-3 text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -323,7 +323,7 @@ export default function Home() {
               </>
             ) : (
               /* ---- Empty state ---- */
-              <div className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] min-h-96 flex flex-col items-center justify-center gap-4 p-8">
+              <div className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] h-full flex flex-col items-center justify-center gap-4 p-8">
                 <div className="w-16 h-16 rounded-full border-2 border-dashed border-[#2A2D3A] flex items-center justify-center">
                   <div className="w-6 h-6 rounded-full border-2 border-[#3A3D4A]" />
                 </div>
