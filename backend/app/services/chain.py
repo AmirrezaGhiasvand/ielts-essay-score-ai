@@ -9,7 +9,9 @@ from langchain_chroma import Chroma
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import Document, HumanMessage, AIMessage
 from langchain.schema.output_parser import StrOutputParser
-
+from app.services.examples import build_few_shot_context
+import numpy as np
+from rank_bm25 import BM25Okapi
 from app.models.schemas import (
     ScoringResponse,
     LLMScoringOutput,
@@ -73,6 +75,99 @@ def get_vector_store() -> Chroma:
         )
     return _vector_store
 
+# -------- Hybrid retrieval --------
+
+def hybrid_retrieve(
+    essay:     str,
+    question:  str,
+    task_type: int,
+    k:         int = 3,
+) -> list[Document]:
+
+    vector_store = get_vector_store()
+
+    # ---- Step 1: Semantic search on essay ----
+    essay_docs = vector_store.similarity_search(
+        query=essay,
+        k=20,
+        filter={"task_type": task_type},
+    )
+
+    # ---- Step 2: Semantic search on question ----
+    question_docs = vector_store.similarity_search(
+        query=question,
+        k=20,
+        filter={"task_type": task_type},
+    )
+
+    # ---- Step 3: Merge candidate pool ----
+    seen     = set()
+    all_docs = []
+    for doc in essay_docs + question_docs:
+        key = doc.page_content[:100]
+        if key not in seen:
+            seen.add(key)
+            all_docs.append(doc)
+
+    if not all_docs:
+        return []
+
+    # ---- Step 4: BM25 on combined essay + question ----
+    query_text = f"{question} {essay}"
+    tokenized_query  = query_text.lower().split()
+    tokenized_corpus = [doc.page_content.lower().split() for doc in all_docs]
+
+    bm25        = BM25Okapi(tokenized_corpus)
+    bm25_scores = bm25.get_scores(tokenized_query)
+
+    # normalize BM25 scores to 0-1
+    bm25_max = bm25_scores.max()
+    if bm25_max > 0:
+        bm25_scores = bm25_scores / bm25_max
+
+    # ---- Step 5: Semantic scores via embeddings ----
+    embeddings    = get_embeddings()
+    essay_vec     = embeddings.embed_query(essay)
+    question_vec  = embeddings.embed_query(question)
+    doc_vecs      = embeddings.embed_documents([d.page_content for d in all_docs])
+
+    def cosine(a, b):
+        a, b   = np.array(a), np.array(b)
+        denom  = np.linalg.norm(a) * np.linalg.norm(b)
+        return float(np.dot(a, b) / denom) if denom > 0 else 0.0
+
+    essay_scores    = [cosine(essay_vec, dv) for dv in doc_vecs]
+    question_scores = [cosine(question_vec, dv) for dv in doc_vecs]
+
+    # ---- Step 6: Weighted combination ----
+    # essay semantic: 40%, question semantic: 30%, BM25 keyword: 30%
+    final_scores = [
+        0.4 * es + 0.3 * qs + 0.3 * bs
+        for es, qs, bs in zip(essay_scores, question_scores, bm25_scores)
+    ]
+
+    # ---- Step 7: Sort and return top k with band diversity ----
+    ranked = sorted(
+        zip(all_docs, final_scores),
+        key=lambda x: x[1],
+        reverse=True,
+    )
+
+    # apply band diversity — avoid returning same band twice
+    selected       = []
+    selected_bands = set()
+
+    for doc, score in ranked:
+        band = doc.metadata.get("overall_band")
+        if band not in selected_bands:
+            selected.append(doc)
+            selected_bands.add(band)
+        elif len(selected) < k:
+            selected.append(doc)
+        if len(selected) >= k:
+            break
+
+    return selected
 
 def get_llm():
     if PROVIDER == "groq":
@@ -135,6 +230,12 @@ def format_docs(docs: list[Document]) -> str:
             context += "No examiner comment available.\n"
     return context
 
+# -------- Build full context (RAG + few-shot examples) --------
+
+def build_context(docs: list[Document], task_type: int) -> str:
+    rag_context      = format_docs(docs)
+    few_shot_context = build_few_shot_context(task_type)
+    return f"{few_shot_context}\n{rag_context}"
 
 # -------- Scoring prompt --------
 
@@ -235,21 +336,18 @@ def score_essay(
             f"Task {task_type} requires at least {min_words} words."
         )
 
-    # ---- RAG retrieval ----
+    # ---- Hybrid RAG retrieval ----
+    # combines essay semantic + question semantic + BM25 keyword search
     print(f"Retrieving similar essays for Task {task_type}...")
-    vector_store = get_vector_store()
-    retriever    = vector_store.as_retriever(
-        search_type="mmr",
-        search_kwargs={
-            "k":       3,
-            "fetch_k": 10,
-            "filter":  {"task_type": task_type},
-        },
+    similar_docs = hybrid_retrieve(
+        essay=essay,
+        question=question,
+        task_type=task_type,
+        k=3,
     )
-    similar_docs = retriever.invoke(essay)
-    context      = format_docs(similar_docs)
+    context = build_context(similar_docs, task_type)
     print(f"Found {len(similar_docs)} similar essays")
-
+    
     # ---- Build and run chain ----
     # use JSON parsing for all providers — with_structured_output behaves
     # inconsistently across Ollama, Groq, and OpenRouter

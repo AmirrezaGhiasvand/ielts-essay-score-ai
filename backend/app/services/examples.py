@@ -1,0 +1,41 @@
+# -------- Few-shot calibration examples --------
+# Real human-scored essays with examiner comments
+# Used to anchor the LLM scoring to real IELTS standards
+
+FEW_SHOT_EXAMPLES = [
+    {
+        "band": 6.0,
+        "task_type": 2,
+        "essay": """Nowadays, it is acknowledged that students from suburban areas find it tough to receive higher education. Whether it should be made easier for them to access university education becomes an ongoing concern, which incurs a highly-charged debate.Obviously, higher education opportunities bring about benefits to students in multiple ways. For example, higher education becomes increasingly important to senior high school graduates, partly it determines if they have the competitive edge in the job market, and partly because it is seen as a guarantee of a certain level of the mental ability, from the computer literacy that is required by the most employers to the capacities of acquiring new knowledge the soonest possible which is valued by most . With a university degree, students from rural areas obtain a job easily, thereby bettering their living conditions and their family as well.Higher education also, however, to impose a heavy burden on families since the rise in the tuition fees are increasingly beyond those families ability to afford. In addition, with the mounting evidence, a university degree is not always a guarantee of seizing a decent job; therefore, their living conditions are likely to able to earn back their tuition fee after graduation. people argue, students from rural areas are not well-advised to pursue a university degree. But I perceive their desire to further their education should not be disrespected and the government should subsidise them to receive higher education.In conclusion, university education should be made fair to everyone, predicated only on their academic performance and mental abilities, rather than their financial capacities and the government should subsidise those students in need.""",
+        "examiner_comment": "The linking words and phrases are used in a correct way. The range of vocabulary is sufficient here. There are some attempts to use more sophisticated words but many of them are inaccurate. Even though there are some errors in grammar and punctuation, they dont make the meaning much harder to understand. Overall, this essay seems worthy of IELTS Band 6.",
+    },
+    {
+        "band": 7.0,
+        "task_type": 2,
+        "essay": """Nowadays, in our competitive world, to succeed, knowledge from school and university is not enough. Therefore, students who study from the school to university get fewer benefits and contribute less too, compared to those who travel or work and get experience and skills. There are two following reasons to support for my opinion. I refer to the group of people who study from school to university as group A and the other group as group B.Firstly, at school and university, what group A gains is almost entirely theory, theory and theory. Of course, theory is very important, however, you cant do everything with just theory. You must have experience. This is what group A lacks. Although in the third or fourth year at university, group A can be apprentices in some companies, to help them approach their future jobs, they arent trained well because of the short time spent working. And the real job is still very strange to them. After graduating, without experience, group A students cant accomplish their work perfectly. On the other hand, it takes them time and money to keep up with other experienced students and they may be scorned. Therefore, group A students can contribute less than group B who have the two most important things: skills and experience.Secondly, as group A students are contributing less, they surely get less benefit. Moreover, many companies which employ people in group A have to train them from ground-up. These companies take this cost from group As salary to reduce the risk of their employees leaving to other companies after being trained. So, less benefits are unavoidable and certain, group B members are more loyal and effective workers. They also have useful experience and skills. Besides, their education is the same as or even higher than that of group A. As the result, group B gets more benefits absolutely.In conclusion, I think a student should travel or work before going to the university. That way, not only will they have basic knowledge but also skills and experience which are useful for them to get a good job and have a brilliant future.""",
+        "examiner_comment": "The use of language and ideas are good and so is the essay structure. Seems worthy of Band 7.",
+    },
+    {
+        "band": 8.0,
+        "task_type": 2,
+        "essay": """Public health has become an increasingly pressing issue in the modern world, with many populations facing rising rates of obesity, diabetes, and other diet-related diseases. This has led to a debate as to whether governments should establish nutrition and food choice laws for the betterment of public health or if it solely falls on individuals to make wise choices. In my view, everyone should take ownership of their diet and assume responsibility for their health because it is the right choice.The argument for government-imposed nutrition and food choice laws is that they could help prevent people from making unhealthy choices which could lead to more serious illnesses down the line. For example, government regulations could limit the amount of sugar or fats allowed in food products, especially those marketed to children, and impose taxes on unhealthy snacks like chips and candy bars. This approach would also benefit those who lack the knowledge about healthy food, necessary to make informed decisions. By providing clear guidelines on what foods are healthy, and by taxing the unhealthy options higher, the government would steer individuals away from unhealthy options.However, there are also some valid arguments against governmental intervention. These types of regulations infringe upon individuals right to choose what they put in their bodies. After all, everyone should be free to make lifestyle choices for themselves. Additionally, there may not be enough evidence to suggest that overly restrictive regulations would have beneficial effects on public health outcomes in the long run. Since peoples love of unhealthy food is often considered an addiction, it is unlikely that a higher price or other warnings would be enough to deter individuals from purchasing unhealthy food items.In conclusion, while there can certainly be benefits associated with implementing nutrition and food choice laws at a governmental level, ultimately it should still come down to personal choice and responsibility as far as ones diet is concerned. Governments should instead focus on providing citizens with better nutrition education, so that they can make better informed decisions about what they consume. This way, they can receive the information they need while still having autonomy over their own diets and lifestyles.""",
+        "examiner_comment": "The writer presented ideas and examples that are relevant and directly related to the topic. All parts of the question have been addressed and the arguments sufficiently supported. The ideas have been presented in a logical way. This essay has plenty of uncommon lexical items which have been used appropriately. There is a variety of complex sentence structures, the writer has good control of punctuation, and the majority of their sentences are error-free. This essay is likely to get Band 8-8.5 in IELTS.",
+    },
+]
+
+
+def build_few_shot_context(task_type: int) -> str:
+    # filter examples by task type — only show relevant task examples
+    examples = [e for e in FEW_SHOT_EXAMPLES if e["task_type"] == task_type]
+
+    if not examples:
+        # fall back to all examples if no task-specific ones
+        examples = FEW_SHOT_EXAMPLES
+
+    context = "\nCALIBRATION EXAMPLES — Real IELTS scored essays:\n"
+    for ex in examples:
+        context += f"\n--- Band {ex['band']} Example ---\n"
+        context += f"Essay: {ex['essay'][:400]}...\n"
+        context += f"Examiner verdict: {ex['examiner_comment']}\n"
+
+    return context
