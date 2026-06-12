@@ -1,4 +1,6 @@
 import json
+import httpx
+import os
 from fastapi import APIRouter, HTTPException
 from app.models.schemas import (
     ScoringRequest,
@@ -58,3 +60,38 @@ async def chat(request: ChatRequest):
 @router.get("/health")
 async def health():
     return {"status": "ok"}
+
+@router.get("/models")
+async def get_models():
+    # ---- Fetch available Ollama models ----
+    ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    ollama_models   = []
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{ollama_base_url}/api/tags", timeout=3.0)
+            if response.status_code == 200:
+                data          = response.json()
+                ollama_models = [m["name"] for m in data.get("models", [])]
+    except Exception:
+        # Ollama not running — return empty list
+        pass
+
+    # ---- Cloud providers always available if API key set ----
+    cloud_models = []
+    if os.getenv("OPENROUTER_API_KEY"):
+        cloud_models += [
+            {"id": "openai/gpt-4o-mini",                    "name": "GPT-4o Mini",       "provider": "openrouter"},
+            {"id": "meta-llama/llama-3.3-70b-instruct:free","name": "Llama 3.3 70b",     "provider": "openrouter"},
+            {"id": "google/gemini-2.0-flash-001",           "name": "Gemini 2.0 Flash",  "provider": "openrouter"},
+        ]
+    if os.getenv("GROQ_API_KEY"):
+        cloud_models += [
+            {"id": "llama-3.3-70b-versatile", "name": "Llama 3.3 70b", "provider": "groq"},
+        ]
+
+    return {
+        "current_provider": os.getenv("PROVIDER", "ollama"),
+        "current_model":    os.getenv("OLLAMA_MODEL", "mistral:7b") if os.getenv("PROVIDER", "ollama") == "ollama" else os.getenv("OPENROUTER_MODEL", ""),
+        "ollama_models":    [{"id": m, "name": m, "provider": "ollama"} for m in ollama_models],
+        "cloud_models":     cloud_models,
+    }

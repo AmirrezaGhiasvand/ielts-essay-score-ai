@@ -19,7 +19,31 @@ APP_PORT = int(os.getenv("APP_PORT", 8000))
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # check if vector store is populated — if not, run populate script
+    import subprocess
+    import httpx
+
+    provider = os.getenv("PROVIDER", "ollama")
+
+    # ---- Start Ollama if provider is local ----
+    if provider == "ollama":
+        ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        try:
+            async with httpx.AsyncClient() as client:
+                await client.get(f"{ollama_url}/api/tags", timeout=2.0)
+            print("Ollama is already running.")
+        except Exception:
+            print("Ollama not running — starting it...")
+            subprocess.Popen(
+                ["ollama", "serve"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            # wait for it to start
+            import asyncio
+            await asyncio.sleep(3)
+            print("Ollama started.")
+
+    # ---- Check vector store ----
     from app.services.chain import get_vector_store
     from scripts.populate_db import populate
 
