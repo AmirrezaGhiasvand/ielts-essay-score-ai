@@ -40,3 +40,22 @@ export async function checkHealth(): Promise<boolean> {
     return false;
   }
 }
+// -------- Models --------
+
+export interface ModelOption {
+  id:       string;
+  name:     string;
+  provider: string;
+}
+
+export interface ModelsResponse {
+  current_provider: string;
+  current_model:    string;
+  ollama_models:    ModelOption[];
+  cloud_models:     ModelOption[];
+}
+
+export async function getModels(): Promise<ModelsResponse> {
+  const response = await client.get<ModelsResponse>("/api/models");
+  return response.data;
+}

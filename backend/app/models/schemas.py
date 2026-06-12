@@ -33,8 +33,10 @@ class ScoringRequest(BaseModel):
     task_type: int  = Field(..., ge=1, le=2, description="1 for Task 1, 2 for Task 2")
     question:  str  = Field(..., min_length=10, description="The IELTS writing prompt")
     essay:     str  = Field(..., min_length=50, description="The candidate's essay")
-    # language code for feedback response e.g. "en", "fa"
     language:  str  = Field(default="en")
+    # optional model override from frontend
+    provider:  str  = Field(default="")
+    model:     str  = Field(default="")
 
 
 # -------- Response --------

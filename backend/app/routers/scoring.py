@@ -26,6 +26,8 @@ async def score(request: ScoringRequest):
             question=request.question,
             essay=request.essay,
             language=request.language,
+            provider=request.provider or None,
+            model=request.model or None,
         )
         return result
 
@@ -63,20 +65,19 @@ async def health():
 
 @router.get("/models")
 async def get_models():
-    # ---- Fetch available Ollama models ----
     ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     ollama_models   = []
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(f"{ollama_base_url}/api/tags", timeout=3.0)
+            print(f"Ollama response status: {response.status_code}")
+            print(f"Ollama response body: {response.text[:500]}")
             if response.status_code == 200:
                 data          = response.json()
                 ollama_models = [m["name"] for m in data.get("models", [])]
-    except Exception:
-        # Ollama not running — return empty list
-        pass
+    except Exception as e:
+        print(f"Ollama connection error: {e}")
 
-    # ---- Cloud providers always available if API key set ----
     cloud_models = []
     if os.getenv("OPENROUTER_API_KEY"):
         cloud_models += [

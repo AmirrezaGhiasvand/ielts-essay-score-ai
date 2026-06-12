@@ -169,27 +169,28 @@ def hybrid_retrieve(
 
     return selected
 
-def get_llm():
-    if PROVIDER == "groq":
+def get_llm(provider_override: str = None, model_override: str = None):
+    # use override if provided, otherwise fall back to env settings
+    active_provider = provider_override or PROVIDER
+    
+    if active_provider == "groq":
         print("Using Groq cloud provider...")
         return ChatGroq(
             api_key=GROQ_API_KEY,
-            model=GROQ_MODEL,
+            model=model_override or GROQ_MODEL,
             temperature=0.2,
         )
-    elif PROVIDER == "openrouter":
+    elif active_provider == "openrouter":
         print("Using OpenRouter cloud provider...")
-        # OpenRouter is OpenAI-compatible — use ChatOpenAI with custom base URL
         return ChatOpenAI(
             api_key=OPENROUTER_API_KEY,
             base_url="https://openrouter.ai/api/v1",
-            model=OPENROUTER_MODEL,
+            model=model_override or OPENROUTER_MODEL,
             temperature=0.2,
         )
-    # default to local Ollama
     print("Using local Ollama provider...")
     return ChatOllama(
-        model=OLLAMA_MODEL,
+        model=model_override or OLLAMA_MODEL,
         base_url=OLLAMA_BASE_URL,
         temperature=0.2,
     )
@@ -322,10 +323,19 @@ def score_essay(
     question:  str,
     essay:     str,
     language:  str = "en",
+    provider:  str = None,
+    model:     str = None,
 ) -> ScoringResponse:
 
     # ---- Start timer ----
     start_time = time.time()
+
+    # ---- Task 1 disabled until multimodal support ----
+    if task_type == 1:
+        raise ValueError(
+            "Task 1 scoring requires a chart or diagram image. "
+            "Multimodal support is coming soon."
+        )
 
     # ---- Validate word count ----
     word_count = len(essay.split())
@@ -351,10 +361,11 @@ def score_essay(
     # ---- Build and run chain ----
     # use JSON parsing for all providers — with_structured_output behaves
     # inconsistently across Ollama, Groq, and OpenRouter
-    model_name = OPENROUTER_MODEL if PROVIDER == "openrouter" else OLLAMA_MODEL
+    active_provider = provider or PROVIDER
+    model_name      = model or (OPENROUTER_MODEL if active_provider == "openrouter" else OLLAMA_MODEL)
     print(f"Scoring essay with {model_name}...")
 
-    llm   = get_llm()
+    llm   = get_llm(provider_override=provider, model_override=model)
     chain = SCORING_PROMPT | llm | StrOutputParser()
     raw   = chain.invoke({
         "task_type": task_type,

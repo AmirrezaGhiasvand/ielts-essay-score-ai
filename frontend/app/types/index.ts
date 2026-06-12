@@ -2,9 +2,11 @@
 
 export interface ScoringRequest {
   task_type: 1 | 2;
-  question: string;
-  essay: string;
-  language: string;
+  question:  string;
+  essay:     string;
+  language:  string;
+  provider:  string;
+  model:     string;
 }
 
 export interface ChatRequest {

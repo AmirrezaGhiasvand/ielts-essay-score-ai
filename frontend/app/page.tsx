@@ -1,5 +1,6 @@
 "use client";
 
+import ModelSelector from "@/app/components/ModelSelector";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,7 +56,8 @@ export default function Home() {
   const wordCount   = essayValue.trim().split(/\s+/).filter(Boolean).length;
   const minWords    = MIN_WORDS[taskType as "1" | "2"];
   const wordCountOk = wordCount >= minWords;
-
+  const [selectedProvider, setSelectedProvider] = useState<string>("ollama");
+  const [selectedModel,    setSelectedModel]    = useState<string>("mistral:7b");
 
   // -------- Submit --------
 
@@ -71,6 +73,8 @@ export default function Home() {
         question:  data.question,
         essay:     data.essay,
         language,
+        provider:  selectedProvider,
+        model:     selectedModel,
       });
       setResult(response);
     } catch (err: unknown) {
@@ -92,6 +96,11 @@ export default function Home() {
     setError(null);
     setSubmittedEssay("");
   }
+// --------- Change --------
+  function handleModelChange(provider: string, modelId: string) {
+    setSelectedProvider(provider);
+    setSelectedModel(modelId);
+  }
 
 
   return (
@@ -109,8 +118,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ---- Language selector ---- */}
-        <div className="relative flex-shrink-0">
+        {/* ---- Controls ---- */}
+        <div className="flex items-center gap-2">
+          <ModelSelector onModelChange={handleModelChange} />
+          <div className="relative flex-shrink-0">
           <button
             onClick={() => setLangOpen(!langOpen)}
             className="flex items-center gap-2 text-sm text-slate-300 hover:text-white bg-[#1A1D27] border border-[#2A2D3A] hover:border-[#C8102E] rounded-lg px-4 py-2 transition-colors font-medium"
@@ -135,6 +146,7 @@ export default function Home() {
               ))}
             </div>
           )}
+         </div>
         </div>
       </header>
 
@@ -157,24 +169,36 @@ export default function Home() {
                   {t.taskType}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
-                  {(["1", "2"] as const).map((type) => (
+                  {(["1", "2"] as const).map((type) => {
+                  const isTask1 = type === "1";
+                  return (
                     <label
                       key={type}
-                      className={`flex items-center justify-center p-2.5 rounded-lg border cursor-pointer text-xs font-medium transition-all ${
-                        taskType === type
-                          ? "border-[#C8102E] bg-[#C8102E]/10 text-[#C8102E]"
-                          : "border-[#2A2D3A] text-slate-500 hover:border-[#3A3D4A] hover:text-slate-300"
+                      title={isTask1 ? "Task 1 requires a chart image — multimodal support coming soon" : ""}
+                      className={`flex flex-col items-center justify-center p-2.5 rounded-lg border text-xs font-medium transition-all ${
+                        isTask1
+                          ? "border-[#2A2D3A] text-slate-600 cursor-not-allowed opacity-50"
+                          : taskType === type
+                          ? "border-[#C8102E] bg-[#C8102E]/10 text-[#C8102E] cursor-pointer"
+                          : "border-[#2A2D3A] text-slate-500 hover:border-[#3A3D4A] hover:text-slate-300 cursor-pointer"
                       }`}
                     >
                       <input
                         type="radio"
                         value={type}
+                        disabled={isTask1}
                         {...register("task_type")}
                         className="sr-only"
                       />
                       {type === "1" ? t.task1 : t.task2}
+                      {isTask1 && (
+                        <span className="text-[9px] text-slate-600 mt-0.5 font-normal">
+                          coming soon
+                        </span>
+                      )}
                     </label>
-                  ))}
+                  );
+                })}
                 </div>
               </div>
 
