@@ -50,6 +50,8 @@ async def chat(request: ChatRequest):
             history=[m.dict() for m in request.history],
             message=request.message,
             language=request.language,
+            provider=request.provider or None,
+            model=request.model or None,
         )
         return ChatResponse(reply=reply)
 

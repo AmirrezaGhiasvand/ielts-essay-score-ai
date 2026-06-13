@@ -296,7 +296,9 @@ REFERENCE ESSAYS:
 IMPORTANT RULES:
 - Scores must be in 0.5 increments only (e.g. 5.0, 5.5, 6.0)
 - DO NOT calculate overall band
-- Respond in this language: {language}
+- You MUST write ALL feedback text in this language: {language}
+- This applies to task_achievement feedback, coherence_cohesion feedback, lexical_resource feedback, grammatical_range_accuracy feedback, and overall_feedback
+- Only the JSON keys must remain in English — all values must be in {language}
 - Respond ONLY in this exact JSON format with no other text:
 {{
     "task_achievement": {{"score": 0.0, "feedback": "..."}},
@@ -452,10 +454,12 @@ def chat_about_essay(
     history:        list[dict],
     message:        str,
     language:       str = "en",
+    provider:       str = None,
+    model:          str = None,
 ) -> str:
 
     language_name = LANGUAGE_MAP.get(language, "English")
-    llm           = get_llm()
+    llm = get_llm(provider_override=provider, model_override=model)
 
     # ---- Build messages with history ----
     # model has no memory — pass full history every time

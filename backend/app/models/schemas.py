@@ -63,10 +63,12 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     essay:          str
     scoring_result: ScoringResponse
-    # full conversation history — passed every time since model has no memory
+   # full conversation history — passed every time since model has no memory 
     history:        list[ChatMessage] = []
     message:        str
     language:       str = Field(default="en")
+    provider:       str = Field(default="")
+    model:          str = Field(default="")
 
 class ChatResponse(BaseModel):
     reply: str
