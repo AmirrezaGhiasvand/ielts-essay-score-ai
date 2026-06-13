@@ -33,10 +33,16 @@ async def lifespan(app: FastAPI):
             print("Ollama is already running.")
         except Exception:
             print("Ollama not running — starting it...")
+            env = os.environ.copy()
+            # set custom model path if configured
+            ollama_models_path = os.getenv("OLLAMA_MODELS_PATH", "")
+            if ollama_models_path:
+                env["OLLAMA_MODELS"] = ollama_models_path
             subprocess.Popen(
                 ["ollama", "serve"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
+                env=env,
             )
             # wait for it to start
             import asyncio
