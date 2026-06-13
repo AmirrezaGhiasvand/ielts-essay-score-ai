@@ -27,12 +27,35 @@ async def lifespan(app: FastAPI):
     # ---- Start Ollama if provider is local ----
     if provider == "ollama":
         ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        ollama_running = False
         try:
             async with httpx.AsyncClient() as client:
-                await client.get(f"{ollama_url}/api/tags", timeout=2.0)
-            print("Ollama is already running.")
+                response = await client.get(f"{ollama_url}/api/tags", timeout=2.0)
+                if response.status_code == 200:
+                    data = response.json()
+                    # verify it actually returned valid data
+                    if "models" in data:
+                        ollama_running = True
+                        print(f"Ollama is already running — {len(data['models'])} models available.")
         except Exception:
+            pass
+
+        if not ollama_running:
             print("Ollama not running — starting it...")
+            env = os.environ.copy()
+            ollama_models_path = os.getenv("OLLAMA_MODELS_PATH", "")
+            if ollama_models_path:
+                env["OLLAMA_MODELS"] = ollama_models_path
+            subprocess.Popen(
+                ["ollama", "serve"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                env=env,
+            )
+            # wait for Ollama to fully start
+            import asyncio
+            await asyncio.sleep(5)
+            print("Ollama started.")
             env = os.environ.copy()
             # set custom model path if configured
             ollama_models_path = os.getenv("OLLAMA_MODELS_PATH", "")
