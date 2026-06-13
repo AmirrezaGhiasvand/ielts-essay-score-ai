@@ -342,6 +342,8 @@ export default function Home() {
                     placeholder={t.chatPlaceholder}
                     sendLabel={t.chatSend}
                     title={t.chatTitle}
+                    provider={selectedProvider}
+                    model={selectedModel}
                   />
                 </div>
               </>

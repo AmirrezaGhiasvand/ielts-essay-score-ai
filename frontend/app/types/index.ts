@@ -10,11 +10,13 @@ export interface ScoringRequest {
 }
 
 export interface ChatRequest {
-  essay: string;
+  essay:          string;
   scoring_result: ScoringResponse;
-  history: ChatMessage[];
-  message: string;
-  language: string;
+  history:        ChatMessage[];
+  message:        string;
+  language:       string;
+  provider:       string;
+  model:          string;
 }
 
 // -------- Response types --------

@@ -12,8 +12,9 @@ interface ChatProps {
   placeholder:   string;
   sendLabel:     string;
   title:         string;
+  provider:      string;
+  model:         string;
 }
-
 export default function Chat({
   essay,
   scoringResult,
@@ -21,6 +22,8 @@ export default function Chat({
   placeholder,
   sendLabel,
   title,
+  provider,
+  model,
 }: ChatProps) {
   const [history,  setHistory]  = useState<ChatMessage[]>([]);
   const [message,  setMessage]  = useState("");
@@ -47,6 +50,8 @@ export default function Chat({
         history:        newHistory,
         message:        userMessage.content,
         language,
+        provider,
+        model,
       });
       setHistory([...newHistory, { role: "assistant", content: response.reply }]);
     } catch {
