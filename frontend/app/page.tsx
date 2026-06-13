@@ -12,7 +12,7 @@ import { LANGUAGES, getUIText } from "@/app/lib/languages";
 import BandGauge from "@/app/components/BandGauge";
 import CriterionCard from "@/app/components/CriterionCard";
 import Chat from "@/app/components/Chat";
-
+import ReactMarkdown from "react-markdown";
 
 // -------- Form schema --------
 
@@ -153,7 +153,7 @@ export default function Home() {
 
       {/* ---- Main ---- */}
       <main className="w-full px-6 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 h-[calc(100vh-64px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 min-h-[calc(100vh-64px)]">
 
 
           {/* ---- Left: Form ---- */}
@@ -211,6 +211,7 @@ export default function Home() {
                   {...register("question")}
                   placeholder={t.questionPlaceholder}
                   rows={3}
+                  dir = "ltr"
                   className="w-full resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] px-4 py-3 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
                 />
                 {errors.question && (
@@ -240,6 +241,7 @@ export default function Home() {
                   {...register("essay")}
                   placeholder={t.essayPlaceholder}
                   rows={10}
+                  dir="ltr"
                   className="w-full flex-1 resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] px-4 py-3 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors font-[var(--font-geist-mono)]"
                 />
                 {errors.essay && (
@@ -282,12 +284,12 @@ export default function Home() {
                 <div className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-5 space-y-5">
 
                   {/* Overall band */}
-                  <div className="flex items-start gap-5">
+                  <div className="flex items-start gap-6 flex-wrap">
                     <BandGauge score={result.overall_band} size={130} label={t.overall} />
-                    <div className="flex-1 space-y-3 pt-2">
-                      <p className="text-sm text-slate-300 leading-relaxed">
-                        {result.overall_feedback}
-                      </p>
+                    <div className="flex-1 min-w-[200px] space-y-3 pt-2">
+                      <div className="text-sm text-slate-300 leading-relaxed prose prose-invert prose-sm max-w-none">
+                        <ReactMarkdown>{result.overall_feedback}</ReactMarkdown>
+                      </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5 text-xs text-slate-600">
                           <Clock size={11} />
@@ -308,7 +310,7 @@ export default function Home() {
                   <div className="border-t border-[#2A2D3A]" />
 
                   {/* Criterion cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <CriterionCard
                       title={t.taskAchievement}
                       data={result.task_achievement}

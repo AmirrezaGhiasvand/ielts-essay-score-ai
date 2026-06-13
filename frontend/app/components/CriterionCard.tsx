@@ -1,6 +1,7 @@
 "use client";
 
 import { CriterionScore } from "@/app/types";
+import ReactMarkdown from "react-markdown";
 
 interface CriterionCardProps {
   title:         string;
@@ -33,11 +34,11 @@ export default function CriterionCard({ title, data, feedbackLabel }: CriterionC
     <div className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-4 space-y-3 hover:border-[#3A3D4A] transition-colors">
 
       {/* ---- Header ---- */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-300 uppercase tracking-wide">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-semibold text-slate-300 uppercase tracking-wide flex-1 min-w-0 truncate">
           {title}
         </span>
-        <span className={`text-sm font-bold px-2 py-0.5 rounded-md border ${scoreColorClass}`}>
+        <span className={`text-sm font-bold px-2 py-0.5 rounded-md border flex-shrink-0 ${scoreColorClass}`}>
           {data.score.toFixed(1)}
         </span>
       </div>
@@ -51,7 +52,9 @@ export default function CriterionCard({ title, data, feedbackLabel }: CriterionC
       </div>
 
       {/* ---- Feedback ---- */}
-      <p className="text-xs text-slate-400 leading-relaxed">{data.feedback}</p>
+      <div className="text-xs text-slate-400 leading-relaxed prose prose-invert prose-xs max-w-none">
+        <ReactMarkdown>{data.feedback}</ReactMarkdown>
+      </div>
 
     </div>
   );

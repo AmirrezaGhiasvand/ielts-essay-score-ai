@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Send } from "lucide-react";
 import { ChatMessage, ScoringResponse } from "@/app/types";
 import { sendChatMessage } from "@/app/lib/api";
+import Markdown from "react-markdown";
 
 interface ChatProps {
   essay:         string;
@@ -95,13 +96,15 @@ export default function Chat({
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[85%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
+              className={`max-w-[85%] rounded-xl px-3 py-2.5 text-sm leading-relaxed ${
                 msg.role === "user"
                   ? "bg-[#C8102E] text-white rounded-br-none"
-                  : "bg-[#0F1117] text-slate-300 rounded-bl-none border border-[#2A2D3A]"
+                  : "bg-[#1E2130] text-slate-300 rounded-bl-none border border-[#2A2D3A]"
               }`}
             >
-              {msg.content}
+              <div className="prose prose-invert prose-sm max-w-none"dir="ltr">
+                <Markdown>{msg.content}</Markdown>
+              </div>
             </div>
           </div>
         ))}
