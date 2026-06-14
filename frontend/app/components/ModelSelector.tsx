@@ -9,10 +9,10 @@ interface ModelSelectorProps {
 }
 
 export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
-  const [models,   setModels]   = useState<ModelsResponse | null>(null);
-  const [open,     setOpen]     = useState(false);
+  const [models, setModels] = useState<ModelsResponse | null>(null);
+  const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<ModelOption | null>(null);
-  const [loading,  setLoading]  = useState(true);
+  const [loading, setLoading] = useState(true);
 
   // ---- Fetch models on mount ----
   useEffect(() => {
@@ -23,8 +23,9 @@ export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
 
         // set current model as selected
         const allModels = [...data.ollama_models, ...data.cloud_models];
-        const current   = allModels.find(
-          (m) => m.id === data.current_model && m.provider === data.current_provider
+        const current = allModels.find(
+          (m) =>
+            m.id === data.current_model && m.provider === data.current_provider,
         );
         if (current) setSelected(current);
       } catch {
@@ -44,7 +45,7 @@ export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-xs text-slate-600 border border-[#2A2D3A] rounded-lg px-3 py-2">
+      <div className="flex px-4! py-2! items-center gap-2 text-sm text-slate-600 border border-[#2A2D3A] rounded-lg">
         <Loader2 size={11} className="animate-spin" />
         <span>Loading models...</span>
       </div>
@@ -55,20 +56,21 @@ export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
     <div className="relative flex-shrink-0">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 text-sm text-slate-300 hover:text-white bg-[#1A1D27] border border-[#2A2D3A] hover:border-[#C8102E] rounded-lg px-3 py-2 transition-colors"
+        className="flex items-center gap-2 text-sm text-slate-300 hover:text-white bg-[#1A1D27] border border-[#2A2D3A] hover:border-[#C8102E] rounded-lg px-4! py-2! transition-colors"
       >
         {selected?.provider === "ollama" ? (
           <Monitor size={13} className="text-slate-400" />
         ) : (
           <Cloud size={13} className="text-slate-400" />
         )}
-        <span className="max-w-[140px] truncate">{selected?.name ?? "Select model"}</span>
+        <span className="max-w-[140px] truncate">
+          {selected?.name ?? "Select model"}
+        </span>
         <ChevronDown size={11} />
       </button>
 
       {open && models && (
         <div className="absolute end-0 top-10 bg-[#1A1D27] border border-[#2A2D3A] rounded-xl shadow-2xl z-30 w-64 overflow-hidden">
-
           {/* ---- Local models ---- */}
           {models.ollama_models.length > 0 && (
             <>
@@ -80,13 +82,16 @@ export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
               </div>
               {models.ollama_models
                 // filter out embedding models
-                .filter((m) => !m.id.includes("embed") && !m.id.includes("cloud"))
+                .filter(
+                  (m) => !m.id.includes("embed") && !m.id.includes("cloud"),
+                )
                 .map((model) => (
                   <button
                     key={model.id}
                     onClick={() => handleSelect(model)}
                     className={`w-full text-left px-3 py-2.5 text-xs transition-colors ${
-                      selected?.id === model.id && selected?.provider === "ollama"
+                      selected?.id === model.id &&
+                      selected?.provider === "ollama"
                         ? "text-[#C8102E] bg-[#C8102E]/10 font-semibold"
                         : "text-slate-300 hover:text-white hover:bg-[#0F1117]"
                     }`}
@@ -111,18 +116,20 @@ export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
                   key={`${model.provider}-${model.id}`}
                   onClick={() => handleSelect(model)}
                   className={`w-full text-left px-3 py-2.5 text-xs transition-colors flex items-center justify-between ${
-                    selected?.id === model.id && selected?.provider === model.provider
+                    selected?.id === model.id &&
+                    selected?.provider === model.provider
                       ? "text-[#C8102E] bg-[#C8102E]/10 font-semibold"
                       : "text-slate-300 hover:text-white hover:bg-[#0F1117]"
                   }`}
                 >
                   <span>{model.name}</span>
-                  <span className="text-[9px] text-slate-600 uppercase">{model.provider}</span>
+                  <span className="text-[9px] text-slate-600 uppercase">
+                    {model.provider}
+                  </span>
                 </button>
               ))}
             </>
           )}
-
         </div>
       )}
     </div>
