@@ -6,13 +6,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2, RotateCcw, Clock, ChevronDown } from "lucide-react";
-import { ScoringResponse, Language } from "@/app/types";
+import { ScoringResponse, Language, CriterionScore } from "@/app/types";
 import { scoreEssay } from "@/app/lib/api";
 import { LANGUAGES, getUIText } from "@/app/lib/languages";
 import BandGauge from "@/app/components/BandGauge";
 import CriterionCard from "@/app/components/CriterionCard";
 import Chat from "@/app/components/Chat";
 import ReactMarkdown from "react-markdown";
+import { FaGithub } from "react-icons/fa";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
 // -------- Form schema --------
 
@@ -30,7 +32,7 @@ const MIN_WORDS = { "1": 150, "2": 250 };
 
 export default function Home() {
   const [language, setLanguage] = useState<Language>(
-    (localStorage.getItem("lang") as Language) || "en",
+    (localStorage.getItem("lang")! as Language) || "en",
   );
   const [result, setResult] = useState<ScoringResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,17 +41,17 @@ export default function Home() {
   const [langOpen, setLangOpen] = useState(false);
 
   const t = getUIText(language);
-  const langInfo = LANGUAGES.find((l) => l.code === language)!;
+  const langInfo = LANGUAGES.find((l) => l.code === language);
 
   const {
     register,
     handleSubmit,
     watch,
     reset,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: { task_type: "2" },
+    defaultValues: { task_type: "2", essay: "", question: "" },
   });
 
   const essayValue = watch("essay") || "";
@@ -103,15 +105,18 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0F1117]" dir={langInfo.dir}>
+    <div className="min-h-screen bg-[#0F1117]" dir={langInfo!.dir}>
       {/* ---- Header ---- */}
-      <header className="border-b border-[#2A2D3A] bg-[#0F1117] px-3! py-2! flex items-center justify-between sticky top-0 z-20 backdrop-blur-sm">
+      <header className="border-b border-[#2A2D3A] bg-[#0F1117] px-3 py-2 flex items-center justify-between sticky top-0 z-20 backdrop-blur-sm">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-[#C8102E] rounded flex items-center justify-center shrink-0">
-            <span className="text-white font-bold text-[15px] tracking-wider">
-              IE
-            </span>
-          </div>
+          <a
+            className="w-9 h-9 bg-[#C8102E] hover:bg-[#C8102E]/70 rounded flex items-center justify-center shrink-0 transition-colors duration-150"
+            href="https://github.com/AmirrezaGhiasvand/ielts-essay-score-ai"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaGithub className="w-6 h-6 cursor-pointer" />
+          </a>
           <div>
             <h1 className="text-md font-semibold text-slate-100">{t.title}</h1>
             <p className="text-[11px] text-slate-500">{t.subtitle}</p>
@@ -119,18 +124,18 @@ export default function Home() {
         </div>
 
         {/* ---- Controls ---- */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <ModelSelector onModelChange={handleModelChange} />
-          <div className="relative shrink-0">
+          {/* <div className="relative shrink-0">
             <button
               onClick={() => setLangOpen(!langOpen)}
-              className="flex items-center gap-2 text-sm text-slate-300 hover:text-white bg-[#1A1D27] border border-[#2A2D3A] hover:border-[#C8102E] rounded-lg px-4! py-2! transition-colors font-medium"
+              className="flex items-center gap-2 text-sm text-slate-300 hover:text-white bg-[#1A1D27] border border-[#2A2D3A] hover:border-[#C8102E] rounded-lg px-4 py-2 transition-colors font-medium"
             >
               {LANGUAGES.find((l) => l.code === language)?.label}
               <ChevronDown size={11} />
             </button>
             {langOpen && (
-              <div className="absolute inset-e-0 top-11 p-2! bg-[#1A1D27] border border-[#2A2D3A] rounded-xl shadow-2xl z-30 min-w-40 overflow-hidden">
+              <div className="absolute inset-e-0 top-11 p-2 bg-[#1A1D27] border border-[#2A2D3A] rounded-xl shadow-2xl z-30 min-w-40 overflow-hidden">
                 {LANGUAGES.map((lang) => (
                   <button
                     key={lang.code}
@@ -139,7 +144,7 @@ export default function Home() {
                       setLanguage(lang.code);
                       setLangOpen(false);
                     }}
-                    className={`w-full text-left px-3! py-2! text-xs transition-colors rounded-2xl ${
+                    className={`w-full text-left px-3 py-2 text-xs transition-colors rounded-2xl ${
                       language === lang.code
                         ? "text-[#C8102E] bg-[#C8102E]/10 font-semibold"
                         : "text-slate-400 hover:text-slate-200 hover:bg-[#0F1117]"
@@ -150,18 +155,51 @@ export default function Home() {
                 ))}
               </div>
             )}
-          </div>
+          </div> */}
+          <Menu>
+            <MenuButton
+              onClick={() => setLangOpen(!langOpen)}
+              className="flex items-center gap-2 text-sm text-slate-300 hover:text-white bg-[#1A1D27] border border-[#2A2D3A] hover:border-[#C8102E] rounded-lg px-4 py-2 transition-colors font-medium focus:outline-none focus:ring-0 focus-visible:outline-none"
+            >
+              {LANGUAGES.find((l) => l.code === language)?.label}
+              <ChevronDown size={11} />
+            </MenuButton>
+            <MenuItems
+              anchor={{ to: "bottom end", gap: "8px" }}
+              transition
+              className="p-2 bg-[#1A1D27] border border-[#2A2D3A] rounded-xl shadow-2xl z-30 w-42 overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0"
+            >
+              {LANGUAGES.map((lang) => (
+                <MenuItem key={lang.code}>
+                  <button
+                    onClick={() => {
+                      localStorage.setItem("lang", lang.code);
+                      setLanguage(lang.code);
+                      setLangOpen(false);
+                    }}
+                    className={`w-full text-center px-3 py-2 my-0.5 text-xs transition-colors rounded-2xl ${
+                      language === lang.code
+                        ? "text-[#C8102E] bg-[#C8102E]/10 font-semibold"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-[#0F1117]"
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                </MenuItem>
+              ))}
+            </MenuItems>
+          </Menu>
         </div>
       </header>
 
       {/* ---- Main ---- */}
-      <main className="w-full px-3! py-2!">
+      <main className="w-full px-3 py-2">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 min-h-[calc(100vh-75px)]">
           {/* ---- Left: Form ---- */}
           <div className="lg:col-span-2">
             <form
               onSubmit={handleSubmit(onSubmit)}
-              className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-3! space-y-5 h-full flex flex-col gap-2"
+              className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-3 space-y-5 h-full flex flex-col"
             >
               {/* Task type */}
               <div className="space-y-2">
@@ -179,7 +217,7 @@ export default function Home() {
                             ? "Task 1 requires a chart image — multimodal support coming soon"
                             : ""
                         }
-                        className={`flex flex-col items-center justify-center p-2.5 rounded-lg border text-xs font-medium transition-all ${
+                        className={`flex flex-col items-center justify-center p-1 rounded-lg border text-md font-medium transition-all ${
                           isTask1
                             ? "border-[#2A2D3A] text-slate-600 cursor-not-allowed opacity-50"
                             : taskType === type
@@ -214,9 +252,9 @@ export default function Home() {
                 <textarea
                   {...register("question")}
                   placeholder={t.questionPlaceholder}
-                  rows={4}
-                  dir={langInfo.dir}
-                  className="w-full resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] p-2! text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
+                  rows={3}
+                  dir={langInfo!.dir}
+                  className="w-full resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] p-2 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
                 />
                 {errors.question && (
                   <p className="text-xs text-red-400">
@@ -245,13 +283,12 @@ export default function Home() {
                     {t.wordCount}
                   </span>
                 </div>
-
                 <textarea
                   {...register("essay")}
                   placeholder={t.essayPlaceholder}
                   rows={10}
-                  dir={langInfo.dir}
-                  className="w-full flex-1 resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] p-2! text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors font-(--font-geist-mono)"
+                  dir={langInfo!.dir}
+                  className="w-full flex-1 resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] p-2 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors font-(--font-geist-mono)"
                 />
                 {errors.essay && (
                   <p className="text-xs text-red-400">{errors.essay.message}</p>
@@ -260,26 +297,36 @@ export default function Home() {
 
               {/* Error */}
               {error && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-3! py-2!">
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
                   <p className="text-xs text-red-400">{error}</p>
                 </div>
               )}
 
               {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading || !wordCountOk}
-                className="w-1/2 mx-auto! bg-[#C8102E] text-white rounded-lg py-1! text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 size={14} className="animate-spin" />
-                    {t.scoring}
-                  </>
-                ) : (
-                  t.submit
-                )}
-              </button>
+              <div className="flex justify-center items-center gap-2">
+                <button
+                  type="submit"
+                  disabled={loading || !wordCountOk}
+                  className="w-1/2 mx-auto bg-[#C8102E] text-white rounded-lg py-1 text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      {t.scoring}
+                    </>
+                  ) : (
+                    t.submit
+                  )}
+                </button>
+                <button
+                  type="button"
+                  disabled={!isDirty}
+                  className="w-1/2 mx-auto bg-[#C8102E] text-white rounded-lg py-1 text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  onClick={() => reset()}
+                >
+                  Clear
+                </button>
+              </div>
             </form>
           </div>
 
