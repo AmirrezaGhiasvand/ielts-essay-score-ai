@@ -193,6 +193,7 @@ def get_llm(provider_override: str = None, model_override: str = None):
         model=model_override or OLLAMA_MODEL,
         base_url=OLLAMA_BASE_URL,
         temperature=0.2,
+        keep_alive="5m",
     )
 
 
