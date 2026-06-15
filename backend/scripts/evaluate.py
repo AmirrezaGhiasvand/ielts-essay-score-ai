@@ -20,7 +20,7 @@ from app.services.chain import get_vector_store
 
 TEST_SET_PATH   = os.path.join(os.path.dirname(__file__), "../data/test.csv")
 RESULTS_PATH    = os.path.join(os.path.dirname(__file__), "../data/eval_results.json")
-N_ESSAYS        = 5       # number of essays to evaluate
+N_ESSAYS        = 50       # number of essays to evaluate
 RANDOM_SEED     = 42
 
 
@@ -55,7 +55,10 @@ def evaluate():
     for i, (_, row) in enumerate(df.iterrows(), 1):
         print(f"\n--- Essay {i}/{N_ESSAYS} ---")
         print(f"Task: {row['task_type']} | Human band: {row['overall_band']}")
-
+        # skip Task 1 until multimodal support is added
+        if int(row["task_type"]) == 1:
+            print(f"Skipping essay {i} — Task 1 not supported yet")
+            continue
         try:
             start    = time.time()
             response = score_essay(
