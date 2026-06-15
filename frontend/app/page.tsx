@@ -324,7 +324,9 @@ export default function Home() {
                   className="w-1/2 mx-auto bg-[#C8102E] text-white rounded-lg py-1 text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                   onClick={() => reset()}
                 >
-                  Clear
+                  {
+                    t.clear
+                  }
                 </button>
               </div>
             </form>

@@ -46,6 +46,7 @@ export const UI_TEXT = {
     errorShort: "Essay too short",
     errorGeneral: "Something went wrong. Please try again.",
     language: "Response Language",
+    clear:"Clear",
   },
   fa: {
     title: "نمره‌دهی مقاله آیلتس",
@@ -76,6 +77,7 @@ export const UI_TEXT = {
     errorShort: "مقاله خیلی کوتاه است",
     errorGeneral: "مشکلی پیش آمد. لطفاً دوباره تلاش کنید.",
     language: "زبان پاسخ",
+    clear:"پاکسازی",
   },
 } as const;
 
