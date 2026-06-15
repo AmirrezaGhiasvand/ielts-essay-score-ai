@@ -282,7 +282,7 @@ IELTS BAND DESCRIPTORS:
 4. Grammatical Range and Accuracy:
    - Band 9: Wide range of structures, rare errors
    - Band 8: Wide range of structures, majority of sentences error-free
-   - Band 7: Variety of structures, some errors
+   - Band 7: Mix of simple and complex structures, few errors
    - Band 6: Mix of simple and complex structures, some errors
    - Band 5: Limited range, frequent errors
    - Band 4: Very limited range, frequent errors distort meaning
