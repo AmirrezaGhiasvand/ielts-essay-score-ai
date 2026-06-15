@@ -84,7 +84,7 @@ async def get_models():
     if os.getenv("OPENROUTER_API_KEY"):
         cloud_models += [
             {"id": "openai/gpt-4o-mini", "name": "GPT-4o Mini", "provider": "openrouter"},
-            {"id": "google/gemma-4-27b-it:free", "name": "Gemma 4 27B", "provider": "openrouter"},
+            {"id": "google/gemma-4-31b-it:free", "name": "Gemma 4 27B", "provider": "openrouter"},
             {"id": "google/gemma-4-26b-a4b-it:free", "name": "Gemma 4 26B (Fast)", "provider": "openrouter"},
         ]
     if os.getenv("GROQ_API_KEY"):
