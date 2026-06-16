@@ -7,14 +7,15 @@ import { sendChatMessage } from "@/app/lib/api";
 import Markdown from "react-markdown";
 
 interface ChatProps {
-  essay:         string;
+  essay: string;
   scoringResult: ScoringResponse;
-  language:      string;
-  placeholder:   string;
-  sendLabel:     string;
-  title:         string;
-  provider:      string;
-  model:         string;
+  language: string;
+  placeholder: string;
+  sendLabel: string;
+  title: string;
+  provider: string;
+  model: string;
+  setChatActive: (value: boolean) => void;
 }
 export default function Chat({
   essay,
@@ -25,10 +26,11 @@ export default function Chat({
   title,
   provider,
   model,
+  setChatActive,
 }: ChatProps) {
-  const [history,  setHistory]  = useState<ChatMessage[]>([]);
-  const [message,  setMessage]  = useState("");
-  const [loading,  setLoading]  = useState(false);
+  const [history, setHistory] = useState<ChatMessage[]>([]);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,6 +40,7 @@ export default function Chat({
   async function handleSend() {
     if (!message.trim() || loading) return;
 
+    setChatActive(true);
     const userMessage: ChatMessage = { role: "user", content: message.trim() };
     const newHistory = [...history, userMessage];
     setHistory(newHistory);
@@ -48,17 +51,23 @@ export default function Chat({
       const response = await sendChatMessage({
         essay,
         scoring_result: scoringResult,
-        history:        newHistory,
-        message:        userMessage.content,
+        history: newHistory,
+        message: userMessage.content,
         language,
         provider,
         model,
       });
-      setHistory([...newHistory, { role: "assistant", content: response.reply }]);
+      setHistory([
+        ...newHistory,
+        { role: "assistant", content: response.reply },
+      ]);
     } catch {
       setHistory([
         ...newHistory,
-        { role: "assistant", content: "Something went wrong. Please try again." },
+        {
+          role: "assistant",
+          content: "Something went wrong. Please try again.",
+        },
       ]);
     } finally {
       setLoading(false);
@@ -74,7 +83,6 @@ export default function Chat({
 
   return (
     <div className="flex flex-col h-full bg-[#1A1D27] rounded-xl border border-[#2A2D3A] overflow-hidden">
-
       {/* ---- Header ---- */}
       <div className="px-4 py-3 border-b border-[#2A2D3A] flex items-center gap-2">
         <div className="w-2 h-2 rounded-full bg-[#C8102E]" />
@@ -86,7 +94,7 @@ export default function Chat({
       {/* ---- Messages ---- */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
         {history.length === 0 && (
-          <p className="text-xs text-slate-600 text-center mt-6">
+          <p className="text-md text-slate-600 text-center mt-6">
             Ask a question about your score or how to improve.
           </p>
         )}
@@ -102,7 +110,7 @@ export default function Chat({
                   : "bg-[#1E2130] text-slate-300 rounded-bl-none border border-[#2A2D3A]"
               }`}
             >
-              <div className="prose prose-invert prose-sm max-w-none"dir="ltr">
+              <div className="prose prose-invert prose-sm max-w-none" dir="ltr">
                 <Markdown>{msg.content}</Markdown>
               </div>
             </div>
@@ -135,12 +143,11 @@ export default function Chat({
         <button
           onClick={handleSend}
           disabled={!message.trim() || loading}
-          className="flex-shrink-0 w-9 h-9 rounded-lg bg-[#C8102E] text-white flex items-center justify-center hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="shrink-0 w-9 h-9 rounded-lg bg-[#C8102E] text-white flex items-center justify-center hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <Send size={14} />
         </button>
       </div>
-
     </div>
   );
 }

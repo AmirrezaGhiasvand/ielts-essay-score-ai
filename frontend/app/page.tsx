@@ -39,6 +39,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [submittedEssay, setSubmittedEssay] = useState("");
   const [langOpen, setLangOpen] = useState(false);
+  const [isChatActive, setIsChatActive] = useState(false);
 
   const t = getUIText(language);
   const langInfo = LANGUAGES.find((l) => l.code === language);
@@ -61,6 +62,51 @@ export default function Home() {
   const wordCountOk = wordCount >= minWords;
   const [selectedProvider, setSelectedProvider] = useState<string>("ollama");
   const [selectedModel, setSelectedModel] = useState<string>("mistral:7b");
+
+  // test result
+  const mockScoringResult: ScoringResponse = {
+    task_achievement: {
+      score: 7.0,
+      feedback:
+        "The essay addresses all parts of the task, though some ideas could be more fully developed. The position is clear throughout.",
+    },
+    coherence_cohesion: {
+      score: 7.5,
+      feedback:
+        "Information is logically organized with clear progression. Cohesive devices are used appropriately, though occasionally repetitive.",
+    },
+    lexical_resource: {
+      score: 6.5,
+      feedback:
+        "A sufficient range of vocabulary is used, but some repetition and occasional inaccuracy reduce precision.",
+    },
+    grammatical_range_accuracy: {
+      score: 6.0,
+      feedback:
+        "There is a mix of simple and complex sentences, but grammatical errors are noticeable and sometimes affect clarity.",
+    },
+    overall_band: 6.5,
+    overall_feedback:
+      "The essay demonstrates a generally effective command of the language with some weaknesses in grammar and lexical precision. Ideas are relevant and mostly well organized.",
+    latency_ms: 1240,
+    similar_essays: [
+      {
+        overall_band: 7.5,
+        examiner_comment:
+          "A well-structured essay with strong arguments and effective use of examples. Minor language issues present but do not hinder understanding.",
+      },
+      {
+        overall_band: 6.0,
+        examiner_comment:
+          "Addresses the task adequately but lacks depth in analysis and contains several grammatical inconsistencies.",
+      },
+      {
+        overall_band: 8.0,
+        examiner_comment:
+          "Excellent response with clear argumentation, varied vocabulary, and strong cohesion throughout.",
+      },
+    ],
+  };
 
   // -------- Submit --------
 
@@ -196,10 +242,10 @@ export default function Home() {
       <main className="w-full px-3 py-2">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 min-h-[calc(100vh-75px)]">
           {/* ---- Left: Form ---- */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 lg:sticky lg:top-16 lg:self-start">
             <form
               onSubmit={handleSubmit(onSubmit)}
-              className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-3 space-y-5 h-full flex flex-col"
+              className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-3 space-y-5 h-[calc(100vh-75px)] flex flex-col"
             >
               {/* Task type */}
               <div className="space-y-2">
@@ -324,16 +370,14 @@ export default function Home() {
                   className="w-1/2 mx-auto bg-[#C8102E] text-white rounded-lg py-1 text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                   onClick={() => reset()}
                 >
-                  {
-                    t.clear
-                  }
+                  {t.clear}
                 </button>
               </div>
             </form>
           </div>
 
           {/* ---- Right: Results + Chat ---- */}
-          <div className="lg:col-span-3 space-y-4">
+          <div className="lg:col-span-3 space-y-4 h-full flex flex-col overflow-hidden">
             {result ? (
               <>
                 {/* ---- Results panel ---- */}
@@ -371,7 +415,13 @@ export default function Home() {
                   <div className="border-t border-[#2A2D3A]" />
 
                   {/* Criterion cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div
+                    className={`grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-hidden transition-[max-height,opacity] duration-350 ease-in-out ${
+                      isChatActive
+                        ? "max-h-0 opacity-0"
+                        : "max-h-150 opacity-100"
+                    }`}
+                  >
                     <CriterionCard
                       title={t.taskAchievement}
                       data={result.task_achievement}
@@ -396,16 +446,17 @@ export default function Home() {
                 </div>
 
                 {/* ---- Chat panel ---- */}
-                <div className="h-80">
+                <div className={`transition-all duration-300 h-full`}>
                   <Chat
                     essay={submittedEssay}
-                    scoringResult={result}
+                    scoringResult={mockScoringResult}
                     language={language}
                     placeholder={t.chatPlaceholder}
                     sendLabel={t.chatSend}
                     title={t.chatTitle}
                     provider={selectedProvider}
                     model={selectedModel}
+                    setChatActive={setIsChatActive}
                   />
                 </div>
               </>
