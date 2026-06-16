@@ -4,7 +4,6 @@ import time
 from dotenv import load_dotenv
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_openai import ChatOpenAI
-from langchain_groq import ChatGroq
 from langchain_chroma import Chroma
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import Document, HumanMessage, AIMessage
@@ -25,8 +24,6 @@ load_dotenv()
 
 OLLAMA_BASE_URL    = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL       = os.getenv("OLLAMA_MODEL", "mistral:7b")
-GROQ_API_KEY       = os.getenv("GROQ_API_KEY")
-GROQ_MODEL         = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_MODEL   = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
 PROVIDER           = os.getenv("PROVIDER", "ollama")
@@ -173,14 +170,7 @@ def get_llm(provider_override: str = None, model_override: str = None):
     # use override if provided, otherwise fall back to env settings
     active_provider = provider_override or PROVIDER
     
-    if active_provider == "groq":
-        print("Using Groq cloud provider...")
-        return ChatGroq(
-            api_key=GROQ_API_KEY,
-            model=model_override or GROQ_MODEL,
-            temperature=0.2,
-        )
-    elif active_provider == "openrouter":
+    if active_provider == "openrouter":
         print("Using OpenRouter cloud provider...")
         return ChatOpenAI(
             api_key=OPENROUTER_API_KEY,
@@ -363,7 +353,7 @@ def score_essay(
     
     # ---- Build and run chain ----
     # use JSON parsing for all providers — with_structured_output behaves
-    # inconsistently across Ollama, Groq, and OpenRouter
+    # inconsistently across Ollama and OpenRouter
     active_provider = provider or PROVIDER
     model_name      = model or (OPENROUTER_MODEL if active_provider == "openrouter" else OLLAMA_MODEL)
     print(f"Scoring essay with {model_name}...")

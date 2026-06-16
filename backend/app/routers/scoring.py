@@ -84,15 +84,8 @@ async def get_models():
     if os.getenv("OPENROUTER_API_KEY"):
         cloud_models += [
             {"id": "openai/gpt-4o-mini", "name": "GPT-4o Mini", "provider": "openrouter"},
-            {"id": "google/gemma-4-31b-it:free", "name": "Gemma 4 27B", "provider": "openrouter"},
-            {"id": "google/gemma-4-26b-a4b-it:free", "name": "Gemma 4 26B (Fast)", "provider": "openrouter"},
         ]
-    if os.getenv("GROQ_API_KEY"):
-        cloud_models += [
-            {"id": "qwen-qwq-32b",                     "name": "Qwen QwQ 32B",        "provider": "groq"},
-            {"id": "llama4-scout-17b-16e-instruct",    "name": "Llama 4 Scout 17B",   "provider": "groq"},
-            {"id": "gpt-oss-120b",                     "name": "GPT OSS 120B",        "provider": "groq"},
-        ]
+   
 
     return {
         "current_provider": os.getenv("PROVIDER", "ollama"),
