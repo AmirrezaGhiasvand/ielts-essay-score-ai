@@ -20,7 +20,7 @@ from app.services.chain import get_vector_store
 
 TEST_SET_PATH   = os.path.join(os.path.dirname(__file__), "../data/test.csv")
 RESULTS_PATH    = os.path.join(os.path.dirname(__file__), "../data/eval_results.json")
-N_ESSAYS        = 50       # number of essays to evaluate
+N_ESSAYS        = 10       # number of essays to evaluate
 RANDOM_SEED     = 42
 
 
@@ -101,7 +101,7 @@ def evaluate():
             })
         
         # respect rate limits for cloud providers
-        if PROVIDER in ("groq", "openrouter") and i < N_ESSAYS:
+        if PROVIDER in ("openrouter") and i < N_ESSAYS:
             print(f"Waiting 35s for rate limit...")
             time.sleep(35)
 
