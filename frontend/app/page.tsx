@@ -60,8 +60,10 @@ export default function Home() {
   const wordCount = essayValue.trim().split(/\s+/).filter(Boolean).length;
   const minWords = MIN_WORDS[taskType as "1" | "2"];
   const wordCountOk = wordCount >= minWords;
-  const [selectedProvider, setSelectedProvider] = useState<string>("ollama");
-  const [selectedModel, setSelectedModel] = useState<string>("mistral:7b");
+  const [selectedProvider, setSelectedProvider] =
+    useState<string>("openrouter");
+  const [selectedModel, setSelectedModel] =
+    useState<string>("openai/gpt-4o-mini");
 
   // test result
   const mockScoringResult: ScoringResponse = {
