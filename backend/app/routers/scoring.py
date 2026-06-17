@@ -1,6 +1,8 @@
 import json
 import httpx
 import os
+import pandas as pd
+import random
 from fastapi import APIRouter, HTTPException
 from app.models.schemas import (
     ScoringRequest,
@@ -118,3 +120,22 @@ async def chat_stream(request: ChatRequest):
             yield f"\n\n[ERROR: {str(e)}]"
 
     return StreamingResponse(event_generator(), media_type="text/plain")
+
+# -------Test-Essay--------
+@router.get("/sample-essay")
+async def get_sample_essay():
+    try:
+        df = pd.read_csv("data/test.csv")
+        task2_essays = df[df["task_type"] == 2]
+
+        if len(task2_essays) == 0:
+            raise HTTPException(status_code=404, detail="No sample essays available")
+
+        sample = task2_essays.sample(n=1).iloc[0]
+
+        return {
+            "question": sample["question"],
+            "essay":    sample["essay"],
+        }
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Test dataset not found")
