@@ -15,18 +15,17 @@ const client = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-
 // -------- API calls --------
 
 export async function scoreEssay(
-  request: ScoringRequest
+  request: ScoringRequest,
 ): Promise<ScoringResponse> {
   const response = await client.post<ScoringResponse>("/api/score", request);
   return response.data;
 }
 
 export async function sendChatMessage(
-  request: ChatRequest
+  request: ChatRequest,
 ): Promise<ChatResponse> {
   const response = await client.post<ChatResponse>("/api/chat", request);
   return response.data;
@@ -43,19 +42,42 @@ export async function checkHealth(): Promise<boolean> {
 // -------- Models --------
 
 export interface ModelOption {
-  id:       string;
-  name:     string;
+  id: string;
+  name: string;
   provider: string;
 }
 
 export interface ModelsResponse {
   current_provider: string;
-  current_model:    string;
-  ollama_models:    ModelOption[];
-  cloud_models:     ModelOption[];
+  current_model: string;
+  ollama_models: ModelOption[];
+  cloud_models: ModelOption[];
 }
 
 export async function getModels(): Promise<ModelsResponse> {
   const response = await client.get<ModelsResponse>("/api/models");
   return response.data;
+}
+
+export async function sendChatMessageStream(
+  request: ChatRequest,
+  onChunk: (text: string) => void,
+): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/chat/stream`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.body) throw new Error("No response body");
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const text = decoder.decode(value, { stream: true });
+    onChunk(text);
+  }
 }

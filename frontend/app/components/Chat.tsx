@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Send } from "lucide-react";
 import { ChatMessage, ScoringResponse } from "@/app/types";
-import { sendChatMessage } from "@/app/lib/api";
+import { sendChatMessageStream } from "@/app/lib/api";
 import Markdown from "react-markdown";
 
 interface ChatProps {
@@ -32,43 +32,77 @@ export default function Chat({
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const revealQueueRef = useRef("");
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history]);
 
+  // ---- Gradually reveal queued characters for a smoother streaming feel ----
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (revealQueueRef.current.length === 0) return;
+
+      // reveal a few characters at a time for a natural typing speed
+      const charsToReveal = revealQueueRef.current.slice(0, 3);
+      revealQueueRef.current = revealQueueRef.current.slice(3);
+
+      setHistory((prev) => {
+        if (prev.length === 0) return prev;
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last.role === "assistant") {
+          updated[updated.length - 1] = {
+            role: "assistant",
+            content: last.content + charsToReveal,
+          };
+        }
+        return updated;
+      });
+    }, 15); // adjust this number to control speed — higher = slower
+
+    return () => clearInterval(interval);
+  }, []);
+
   async function handleSend() {
     if (!message.trim() || loading) return;
 
-    setChatActive(true);
     const userMessage: ChatMessage = { role: "user", content: message.trim() };
     const newHistory = [...history, userMessage];
     setHistory(newHistory);
     setMessage("");
     setLoading(true);
 
+    // add an empty assistant message that we'll fill in as chunks arrive
+    setHistory([...newHistory, { role: "assistant", content: "" }]);
+
     try {
-      const response = await sendChatMessage({
-        essay,
-        scoring_result: scoringResult,
-        history: newHistory,
-        message: userMessage.content,
-        language,
-        provider,
-        model,
-      });
-      setHistory([
-        ...newHistory,
-        { role: "assistant", content: response.reply },
-      ]);
-    } catch {
-      setHistory([
-        ...newHistory,
+      let accumulated = "";
+
+      await sendChatMessageStream(
         {
+          essay,
+          scoring_result: scoringResult,
+          history: newHistory,
+          message: userMessage.content,
+          language,
+          provider,
+          model,
+        },
+        (chunk: string) => {
+          accumulated += chunk;
+          revealQueueRef.current += chunk;
+        },
+      );
+    } catch {
+      setHistory((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
           role: "assistant",
           content: "Something went wrong. Please try again.",
-        },
-      ]);
+        };
+        return updated;
+      });
     } finally {
       setLoading(false);
     }
@@ -98,25 +132,32 @@ export default function Chat({
             Ask a question about your score or how to improve.
           </p>
         )}
-        {history.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
+        {history.map((msg, i) => {
+          if (msg.role === "assistant" && msg.content === "" && loading)
+            return null;
+          return (
             <div
-              className={`max-w-[85%] rounded-xl px-3 py-2.5 text-sm leading-relaxed ${
-                msg.role === "user"
-                  ? "bg-[#C8102E] text-white rounded-br-none"
-                  : "bg-[#1E2130] text-slate-300 rounded-bl-none border border-[#2A2D3A]"
-              }`}
+              key={i}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
-              <div className="prose prose-invert prose-sm max-w-none" dir="ltr">
-                <Markdown>{msg.content}</Markdown>
+              <div
+                className={`max-w-[85%] rounded-xl px-3 py-2.5 text-sm leading-relaxed ${
+                  msg.role === "user"
+                    ? "bg-[#C8102E] text-white rounded-br-none"
+                    : "bg-[#1E2130] text-slate-300 rounded-bl-none border border-[#2A2D3A]"
+                }`}
+              >
+                <div
+                  className="prose prose-invert prose-sm max-w-none"
+                  dir="ltr"
+                >
+                  <Markdown>{msg.content}</Markdown>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-        {loading && (
+          );
+        })}
+        {loading && history[history.length - 1]?.content === "" && (
           <div className="flex justify-start">
             <div className="bg-[#0F1117] border border-[#2A2D3A] rounded-xl rounded-bl-none px-3 py-2.5">
               <div className="flex gap-1">
