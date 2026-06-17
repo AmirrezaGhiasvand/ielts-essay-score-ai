@@ -16,6 +16,8 @@ import ReactMarkdown from "react-markdown";
 import { FaGithub } from "react-icons/fa";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import ErrorHighlightedEssay from "@/app/components/ErrorHighlightedEssay";
+import { getSampleEssay } from "@/app/lib/api";
+import { Shuffle } from "lucide-react";
 
 // -------- Form schema --------
 
@@ -50,6 +52,7 @@ export default function Home() {
     handleSubmit,
     watch,
     reset,
+    setValue,
     formState: { errors, isDirty },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -65,7 +68,7 @@ export default function Home() {
     useState<string>("openrouter");
   const [selectedModel, setSelectedModel] =
     useState<string>("openai/gpt-4o-mini");
-
+  const [loadingSample, setLoadingSample] = useState(false);
   // // test result
   // const mockScoringResult: ScoringResponse = {
   //   task_achievement: {
@@ -148,6 +151,21 @@ export default function Home() {
     setError(null);
     setSubmittedEssay("");
   }
+
+  async function handleGenerateSample() {
+    setLoadingSample(true);
+    try {
+      const sample = await getSampleEssay();
+      setValue("question", sample.question);
+      setValue("essay", sample.essay);
+      setValue("task_type", "2");
+    } catch {
+      setError("Failed to load sample essay");
+    } finally {
+      setLoadingSample(false);
+    }
+  }
+
   // --------- Change --------
   function handleModelChange(provider: string, modelId: string) {
     setSelectedProvider(provider);
@@ -251,9 +269,24 @@ export default function Home() {
               onSubmit={handleSubmit(onSubmit)}
               className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-3 space-y-5 h-[calc(100vh-75px)] flex flex-col"
             >
+              {/* Sample essay button */}
+              <button
+                type="button"
+                onClick={handleGenerateSample}
+                disabled={loadingSample}
+                className="w-full flex items-center justify-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 border border-dashed border-[#2A2D3A] hover:border-[#3A3D4A] rounded-lg py-2.5 transition-colors disabled:opacity-50"
+              >
+                {loadingSample ? (
+                  <Loader2 size={13} className="animate-spin" />
+                ) : (
+                  <Shuffle size={13} />
+                )}
+                {t.trySample}
+              </button>
+
               {/* Task type */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-500 uppercase tracking-widest">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
                   {t.taskType}
                 </label>
                 <div className="grid grid-cols-2 gap-2">

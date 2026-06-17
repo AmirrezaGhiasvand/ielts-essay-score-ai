@@ -39,6 +39,17 @@ export async function checkHealth(): Promise<boolean> {
     return false;
   }
 }
+
+export interface SampleEssay {
+  question: string;
+  essay: string;
+}
+
+export async function getSampleEssay(): Promise<SampleEssay> {
+  const response = await client.get<SampleEssay>("/api/sample-essay");
+  return response.data;
+}
+
 // -------- Models --------
 
 export interface ModelOption {
