@@ -30,8 +30,17 @@ const UNDERLINE_COLORS: Record<string, string> = {
 
 // -------- Find all match spans for each error, then merge overlaps --------
 
+// -------- Build precise non-overlapping segments --------
+// Each segment gets the exact set of error types active in that character range
+
+interface RawMatch {
+  start: number;
+  end: number;
+  error: TextError;
+}
+
 function buildSpans(essay: string, errors: TextError[]): Span[] {
-  const rawSpans: Span[] = [];
+  const matches: RawMatch[] = [];
 
   for (const error of errors) {
     if (!error.original) continue;
@@ -39,29 +48,52 @@ function buildSpans(essay: string, errors: TextError[]): Span[] {
     while (true) {
       const idx = essay.indexOf(error.original, searchFrom);
       if (idx === -1) break;
-      rawSpans.push({
-        start: idx,
-        end: idx + error.original.length,
-        errors: [error],
-      });
+      matches.push({ start: idx, end: idx + error.original.length, error });
       searchFrom = idx + error.original.length;
     }
   }
 
-  if (rawSpans.length === 0) return [];
+  if (matches.length === 0) return [];
 
-  rawSpans.sort((a, b) => a.start - b.start);
+  // collect all unique boundary points (starts and ends)
+  const boundaries = new Set<number>();
+  matches.forEach((m) => {
+    boundaries.add(m.start);
+    boundaries.add(m.end);
+  });
+  const sortedBoundaries = Array.from(boundaries).sort((a, b) => a - b);
 
-  const merged: Span[] = [rawSpans[0]];
-  for (let i = 1; i < rawSpans.length; i++) {
-    const current = rawSpans[i];
+  // build a segment between each pair of consecutive boundaries
+  const segments: Span[] = [];
+  for (let i = 0; i < sortedBoundaries.length - 1; i++) {
+    const segStart = sortedBoundaries[i];
+    const segEnd = sortedBoundaries[i + 1];
+
+    // find which errors are active during this segment
+    const activeErrors = matches
+      .filter((m) => m.start <= segStart && m.end >= segEnd)
+      .map((m) => m.error);
+
+    if (activeErrors.length > 0) {
+      segments.push({ start: segStart, end: segEnd, errors: activeErrors });
+    }
+  }
+
+  // merge adjacent segments that have the exact same set of error types
+  // (avoids splitting "technology" into letter-by-letter spans unnecessarily)
+  const merged: Span[] = [];
+  for (const seg of segments) {
     const last = merged[merged.length - 1];
+    const sameTypes =
+      last &&
+      last.end === seg.start &&
+      last.errors.length === seg.errors.length &&
+      last.errors.every((e, idx) => e === seg.errors[idx]);
 
-    if (current.start < last.end) {
-      last.end = Math.max(last.end, current.end);
-      last.errors = [...last.errors, ...current.errors];
+    if (sameTypes) {
+      last.end = seg.end;
     } else {
-      merged.push(current);
+      merged.push({ ...seg });
     }
   }
 
