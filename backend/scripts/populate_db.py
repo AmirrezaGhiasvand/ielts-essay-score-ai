@@ -3,9 +3,8 @@ import sys
 import pandas as pd
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
-from langchain_ollama import OllamaEmbeddings
-from langchain.schema import Document
-
+from langchain_classic.schema import Document
+from langchain_huggingface import HuggingFaceEmbeddings
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
@@ -15,7 +14,9 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
 CHROMA_DB_PATH       = os.getenv("CHROMA_DB_PATH", "./chroma_db")
 CHROMA_COLLECTION    = os.getenv("CHROMA_COLLECTION_NAME", "ielts_essays")
-EMBEDDING_MODEL      = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
+EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "huggingface")  # "huggingface" or "ollama"
+EMBEDDING_MODEL     = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+OLLAMA_EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
 CLEANED_DATASET_PATH = os.path.join(os.path.dirname(__file__), "../data/cleaned_dataset.csv")
 TEST_SET_PATH        = os.path.join(os.path.dirname(__file__), "../data/test.csv")
 TRAIN_SET_PATH       = os.path.join(os.path.dirname(__file__), "../data/train.csv")
@@ -107,7 +108,7 @@ def populate():
 
     # ---- Connect to ChromaDB ----
     print(f"\nConnecting to ChromaDB at {CHROMA_DB_PATH}...")
-    embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL)
+    embeddings = HuggingFaceEmbeddings(model=EMBEDDING_MODEL)
     vector_store = Chroma(
         collection_name=CHROMA_COLLECTION,
         embedding_function=embeddings,

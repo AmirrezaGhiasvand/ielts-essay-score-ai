@@ -3,11 +3,12 @@ import json
 import time
 from dotenv import load_dotenv
 from langchain_ollama import ChatOllama, OllamaEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_chroma import Chroma
-from langchain.prompts import ChatPromptTemplate
-from langchain.schema import Document, HumanMessage, AIMessage
-from langchain.schema.output_parser import StrOutputParser
+from langchain_classic.prompts import ChatPromptTemplate
+from langchain_classic.schema import Document, HumanMessage, AIMessage
+from langchain_classic.schema.output_parser import StrOutputParser
 from app.services.examples import build_few_shot_context
 import numpy as np
 from rank_bm25 import BM25Okapi
@@ -27,7 +28,9 @@ OLLAMA_MODEL       = os.getenv("OLLAMA_MODEL", "mistral:7b")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_MODEL   = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
 PROVIDER           = os.getenv("PROVIDER", "ollama")
-EMBEDDING_MODEL    = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
+EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "huggingface")  # "huggingface" or "ollama"
+EMBEDDING_MODEL     = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
+OLLAMA_EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
 CHROMA_DB_PATH     = os.getenv("CHROMA_DB_PATH", "./chroma_db")
 CHROMA_COLLECTION  = os.getenv("CHROMA_COLLECTION_NAME", "ielts_essays")
 
@@ -53,11 +56,19 @@ _embeddings   = None
 _vector_store = None
 
 
-def get_embeddings() -> OllamaEmbeddings:
+def get_embeddings():
     global _embeddings
     if _embeddings is None:
-        print("Initializing embedding model...")
-        _embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL)
+        if EMBEDDING_PROVIDER == "ollama":
+            print("Initializing Ollama embedding model...")
+            _embeddings = OllamaEmbeddings(model=OLLAMA_EMBEDDING_MODEL)
+        else:
+            print("Initializing HuggingFace embedding model (no API key needed)...")
+            _embeddings = HuggingFaceEmbeddings(
+                model_name=EMBEDDING_MODEL,
+                model_kwargs={"device": "cpu"},
+                encode_kwargs={"normalize_embeddings": True},
+            )
     return _embeddings
 
 
