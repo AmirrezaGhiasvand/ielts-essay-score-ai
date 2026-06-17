@@ -15,6 +15,7 @@ import Chat from "@/app/components/Chat";
 import ReactMarkdown from "react-markdown";
 import { FaGithub } from "react-icons/fa";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import ErrorHighlightedEssay from "@/app/components/ErrorHighlightedEssay";
 
 // -------- Form schema --------
 
@@ -65,50 +66,51 @@ export default function Home() {
   const [selectedModel, setSelectedModel] =
     useState<string>("openai/gpt-4o-mini");
 
-  // test result
-  const mockScoringResult: ScoringResponse = {
-    task_achievement: {
-      score: 7.0,
-      feedback:
-        "The essay addresses all parts of the task, though some ideas could be more fully developed. The position is clear throughout.",
-    },
-    coherence_cohesion: {
-      score: 7.5,
-      feedback:
-        "Information is logically organized with clear progression. Cohesive devices are used appropriately, though occasionally repetitive.",
-    },
-    lexical_resource: {
-      score: 6.5,
-      feedback:
-        "A sufficient range of vocabulary is used, but some repetition and occasional inaccuracy reduce precision.",
-    },
-    grammatical_range_accuracy: {
-      score: 6.0,
-      feedback:
-        "There is a mix of simple and complex sentences, but grammatical errors are noticeable and sometimes affect clarity.",
-    },
-    overall_band: 6.5,
-    overall_feedback:
-      "The essay demonstrates a generally effective command of the language with some weaknesses in grammar and lexical precision. Ideas are relevant and mostly well organized.",
-    latency_ms: 1240,
-    similar_essays: [
-      {
-        overall_band: 7.5,
-        examiner_comment:
-          "A well-structured essay with strong arguments and effective use of examples. Minor language issues present but do not hinder understanding.",
-      },
-      {
-        overall_band: 6.0,
-        examiner_comment:
-          "Addresses the task adequately but lacks depth in analysis and contains several grammatical inconsistencies.",
-      },
-      {
-        overall_band: 8.0,
-        examiner_comment:
-          "Excellent response with clear argumentation, varied vocabulary, and strong cohesion throughout.",
-      },
-    ],
-  };
+  // // test result
+  // const mockScoringResult: ScoringResponse = {
+  //   task_achievement: {
+  //     score: 7.0,
+  //     feedback:
+  //       "The essay addresses all parts of the task, though some ideas could be more fully developed. The position is clear throughout.",
+  //   },
+  //   coherence_cohesion: {
+  //     score: 7.5,
+  //     feedback:
+  //       "Information is logically organized with clear progression. Cohesive devices are used appropriately, though occasionally repetitive.",
+  //   },
+  //   lexical_resource: {
+  //     score: 6.5,
+  //     feedback:
+  //       "A sufficient range of vocabulary is used, but some repetition and occasional inaccuracy reduce precision.",
+  //   },
+  //   grammatical_range_accuracy: {
+  //     score: 6.0,
+  //     feedback:
+  //       "There is a mix of simple and complex sentences, but grammatical errors are noticeable and sometimes affect clarity.",
+  //   },
+  //   overall_band: 6.5,
+  //   overall_feedback:
+  //     "The essay demonstrates a generally effective command of the language with some weaknesses in grammar and lexical precision. Ideas are relevant and mostly well organized.",
+  //   latency_ms: 1240,
+  //   similar_essays: [
+  //     {
+  //       overall_band: 7.5,
+  //       examiner_comment:
+  //         "A well-structured essay with strong arguments and effective use of examples. Minor language issues present but do not hinder understanding.",
+  //     },
+  //     {
+  //       overall_band: 6.0,
+  //       examiner_comment:
+  //         "Addresses the task adequately but lacks depth in analysis and contains several grammatical inconsistencies.",
+  //     },
+  //     {
+  //       overall_band: 8.0,
+  //       examiner_comment:
+  //         "Excellent response with clear argumentation, varied vocabulary, and strong cohesion throughout.",
+  //     },
+  //   ],
+  //   text_errors: [],
+  // };
 
   // -------- Submit --------
 
@@ -416,6 +418,40 @@ export default function Home() {
                   {/* Divider */}
                   <div className="border-t border-[#2A2D3A]" />
 
+                  {/* Error-highlighted essay */}
+                  {result.text_errors.length > 0 && (
+                    <>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                            Your Essay — Errors Highlighted
+                          </span>
+                          <div className="flex items-center gap-3 text-[10px] text-slate-500">
+                            <span className="flex items-center gap-1">
+                              <span className="w-2 h-2 rounded-full bg-orange-400" />{" "}
+                              Grammar
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <span className="w-2 h-2 rounded-full bg-red-400" />{" "}
+                              Spelling
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <span className="w-2 h-2 rounded-full bg-stone-400" />{" "}
+                              Repetition
+                            </span>
+                          </div>
+                        </div>
+                        <div className="bg-[#0F1117] border border-[#2A2D3A] rounded-lg p-4 text-sm text-slate-300">
+                          <ErrorHighlightedEssay
+                            essay={submittedEssay}
+                            errors={result.text_errors}
+                          />
+                        </div>
+                      </div>
+                      <div className="border-t border-[#2A2D3A]" />
+                    </>
+                  )}
+
                   {/* Criterion cards */}
                   <div
                     className={`grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-hidden transition-[max-height,opacity] duration-350 ease-in-out ${
@@ -451,7 +487,7 @@ export default function Home() {
                 <div className={`transition-all duration-300 h-full`}>
                   <Chat
                     essay={submittedEssay}
-                    scoringResult={mockScoringResult}
+                    scoringResult={result}
                     language={language}
                     placeholder={t.chatPlaceholder}
                     sendLabel={t.chatSend}

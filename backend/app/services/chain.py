@@ -309,6 +309,74 @@ Essay:
 ])
 
 
+
+# -------- Error detection prompt --------
+
+ERROR_DETECTION_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", """You are a meticulous proofreader analyzing an IELTS essay for three types of issues:
+
+1. GRAMMAR ERRORS — incorrect verb tense, subject-verb agreement, articles, prepositions, sentence structure
+2. SPELLING ERRORS — misspelled words, typos
+3. REPETITION — the same word or phrase used too many times when a synonym would be better
+   - Pay special attention to topic-related nouns and key terms that repeat throughout the essay
+   - Even common topic words (e.g. "technology", "education", "government") should be flagged if used excessively (3+ times) without variation
+
+CRITICAL RULES:
+- The "original" field MUST be an EXACT substring copied from the essay, character for character
+- Only flag genuine errors — do not invent issues that are not present
+- For repetition, scan the ENTIRE essay and count how many times important content words appear (nouns, verbs, adjectives related to the topic)
+- Flag ANY word used 5 or more times if a synonym would improve variety — this includes topic-specific words like the main subject of the essay
+- Ignore only function words (the, is, and, a, to, of, in, that, this)
+- Do NOT state a specific count in the explanation — just note that it is repeated often
+- If the essay has very few errors, return fewer items — do not pad the list
+- Respond ONLY in valid JSON format, nothing else
+
+Respond in this exact JSON format:
+{{
+    "errors": [
+        {{"error_type": "grammar", "original": "exact text from essay", "correction": "corrected text", "explanation": "brief explanation"}},
+        {{"error_type": "spelling", "original": "exact text from essay", "correction": "corrected text", "explanation": "brief explanation"}},
+        {{"error_type": "repetition", "original": "exact word from essay", "correction": "suggested synonym", "explanation": "this word is repeated frequently, consider varying vocabulary"}}
+    ]
+}}
+"""),
+    ("human", "Essay:\n{essay}"),
+])
+
+
+# -------- Detect text errors --------
+
+def detect_text_errors(essay: str) -> list[dict]:
+    print("Detecting text errors...")
+    llm   = get_llm()
+    chain = ERROR_DETECTION_PROMPT | llm | StrOutputParser()
+
+    try:
+        raw = chain.invoke({"essay": essay})
+
+        raw = raw.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        raw = raw.strip()
+
+        data   = json.loads(raw)
+        errors = data.get("errors", [])
+
+        # verify each "original" actually exists in the essay
+        # discard hallucinated errors that don't match real text
+        verified_errors = [e for e in errors if e.get("original", "") in essay]
+
+        print(f"Found {len(errors)} errors, {len(verified_errors)} verified as exact matches")
+        return verified_errors
+
+    except Exception as e:
+        print(f"Error detection failed: {e}")
+        return []
+
+
+
 # -------- Score essay --------
 
 def score_essay(
@@ -402,6 +470,12 @@ def score_essay(
         for doc in similar_docs
     ]
 
+        # ---- Detect text errors (separate LLM call) ----
+    text_errors = detect_text_errors(essay)
+
+    # ---- Final latency including error detection ----
+    latency_ms = int((time.time() - start_time) * 1000)
+
     return ScoringResponse(
         task_achievement=result.task_achievement,
         coherence_cohesion=result.coherence_cohesion,
@@ -411,6 +485,7 @@ def score_essay(
         overall_feedback=result.overall_feedback,
         latency_ms=latency_ms,
         similar_essays=similar_essays if similar_essays else None,
+        text_errors=text_errors,
     )
 
 

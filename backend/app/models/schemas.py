@@ -27,6 +27,19 @@ class LLMScoringOutput(BaseModel):
     overall_feedback:           str
 
 
+# -------- Error highlighting --------
+
+class TextError(BaseModel):
+    error_type: str = Field(..., description="grammar, spelling, or repetition")
+    original:   str = Field(..., description="exact text from the essay with the error")
+    correction: str = Field(..., description="suggested correction")
+    explanation: str = Field(..., description="brief explanation of the error")
+
+
+
+class ErrorAnalysis(BaseModel):
+    errors: list[TextError] = []
+
 # -------- Request --------
 
 class ScoringRequest(BaseModel):
@@ -51,6 +64,7 @@ class ScoringResponse(BaseModel):
     latency_ms:                 int
     # None if RAG finds no similar essays
     similar_essays: Optional[list[SimilarEssay]] = None
+    text_errors:    list[TextError] = []
 
 
 # -------- Follow-up chat --------

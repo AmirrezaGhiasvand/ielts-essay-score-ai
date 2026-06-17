@@ -2,21 +2,28 @@
 
 export interface ScoringRequest {
   task_type: 1 | 2;
-  question:  string;
-  essay:     string;
-  language:  string;
-  provider:  string;
-  model:     string;
+  question: string;
+  essay: string;
+  language: string;
+  provider: string;
+  model: string;
 }
 
 export interface ChatRequest {
-  essay:          string;
+  essay: string;
   scoring_result: ScoringResponse;
-  history:        ChatMessage[];
-  message:        string;
-  language:       string;
-  provider:       string;
-  model:          string;
+  history: ChatMessage[];
+  message: string;
+  language: string;
+  provider: string;
+  model: string;
+}
+
+export interface TextError {
+  error_type: "grammar" | "spelling" | "repetition";
+  original: string;
+  correction: string;
+  explanation: string;
 }
 
 // -------- Response types --------
@@ -40,6 +47,7 @@ export interface ScoringResponse {
   overall_feedback: string;
   latency_ms: number;
   similar_essays: SimilarEssay[] | null;
+  text_errors: TextError[];
 }
 
 export interface ChatMessage {

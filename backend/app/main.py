@@ -21,56 +21,48 @@ APP_PORT = int(os.getenv("APP_PORT", 8000))
 async def lifespan(app: FastAPI):
     import subprocess
     import httpx
+    import asyncio
 
-    provider = os.getenv("PROVIDER", "ollama")
+    # ---- Always ensure Ollama is running (needed for embeddings even with cloud LLMs) ----
+    ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 
-    # ---- Start Ollama if provider is local ----
-    if provider == "ollama":
-        ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        ollama_running = False
+    async def check_ollama() -> bool:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(f"{ollama_url}/api/tags", timeout=2.0)
                 if response.status_code == 200:
                     data = response.json()
-                    # verify it actually returned valid data
-                    if "models" in data:
-                        ollama_running = True
-                        print(f"Ollama is already running — {len(data['models'])} models available.")
+                    return "models" in data
         except Exception:
             pass
+        return False
 
-        if not ollama_running:
-            print("Ollama not running — starting it...")
-            env = os.environ.copy()
-            ollama_models_path = os.getenv("OLLAMA_MODELS_PATH", "")
-            if ollama_models_path:
-                env["OLLAMA_MODELS"] = ollama_models_path
-            subprocess.Popen(
-                ["ollama", "serve"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                env=env,
-            )
-            # wait for Ollama to fully start
-            import asyncio
-            await asyncio.sleep(5)
-            print("Ollama started.")
-            env = os.environ.copy()
-            # set custom model path if configured
-            ollama_models_path = os.getenv("OLLAMA_MODELS_PATH", "")
-            if ollama_models_path:
-                env["OLLAMA_MODELS"] = ollama_models_path
-            subprocess.Popen(
-                ["ollama", "serve"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                env=env,
-            )
-            # wait for it to start
-            import asyncio
+    ollama_running = await check_ollama()
+
+    if not ollama_running:
+        print("Ollama not running — starting it...")
+        env = os.environ.copy()
+        ollama_models_path = os.getenv("OLLAMA_MODELS_PATH", "")
+        if ollama_models_path:
+            env["OLLAMA_MODELS"] = ollama_models_path
+        subprocess.Popen(
+            ["ollama", "serve"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            env=env,
+        )
+
+        # ---- Retry until Ollama is confirmed running (max 15s) ----
+        for attempt in range(5):
             await asyncio.sleep(3)
-            print("Ollama started.")
+            if await check_ollama():
+                print(f"Ollama started successfully (attempt {attempt + 1}).")
+                ollama_running = True
+                break
+        else:
+            print("WARNING: Ollama did not start after 15s — embeddings may fail.")
+    else:
+        print("Ollama is already running.")
 
     # ---- Check vector store ----
     from app.services.chain import get_vector_store
