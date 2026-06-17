@@ -563,3 +563,46 @@ def chat_about_essay(
 
     response = llm.invoke(final_messages)
     return response.content.strip()
+
+# -------- Follow-up chat (streaming) --------
+
+def chat_about_essay_stream(
+    essay:          str,
+    scoring_result: ScoringResponse,
+    history:        list[dict],
+    message:        str,
+    language:       str = "en",
+    provider:       str = None,
+    model:          str = None,
+):
+    language_name = LANGUAGE_MAP.get(language, "English")
+    llm            = get_llm(provider_override=provider, model_override=model)
+
+    messages = CHAT_PROMPT.format_messages(
+        language=language_name,
+        essay=essay,
+        task_achievement_score=scoring_result.task_achievement.score,
+        task_achievement_feedback=scoring_result.task_achievement.feedback,
+        coherence_score=scoring_result.coherence_cohesion.score,
+        coherence_feedback=scoring_result.coherence_cohesion.feedback,
+        lexical_score=scoring_result.lexical_resource.score,
+        lexical_feedback=scoring_result.lexical_resource.feedback,
+        grammar_score=scoring_result.grammatical_range_accuracy.score,
+        grammar_feedback=scoring_result.grammatical_range_accuracy.feedback,
+        overall_band=scoring_result.overall_band,
+        overall_feedback=scoring_result.overall_feedback,
+        message=message,
+    )
+
+    final_messages = [messages[0]]
+    for msg in history:
+        if msg["role"] == "user":
+            final_messages.append(HumanMessage(content=msg["content"]))
+        else:
+            final_messages.append(AIMessage(content=msg["content"]))
+    final_messages.append(messages[-1])
+
+    # stream tokens as they arrive from the LLM
+    for chunk in llm.stream(final_messages):
+        if chunk.content:
+            yield chunk.content

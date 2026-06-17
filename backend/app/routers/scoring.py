@@ -9,7 +9,7 @@ from app.models.schemas import (
     ChatResponse,
 )
 from app.services.chain import score_essay, chat_about_essay
-
+from fastapi.responses import StreamingResponse
 
 # -------- Settings --------
 
@@ -93,3 +93,28 @@ async def get_models():
         "ollama_models":    [{"id": m, "name": m, "provider": "ollama"} for m in ollama_models],
         "cloud_models":     cloud_models,
     }
+
+
+# ------- Streaming ---------
+@router.post("/chat/stream")
+async def chat_stream(request: ChatRequest):
+    from app.services.chain import chat_about_essay_stream
+
+    async def event_generator():
+        try:
+            for chunk in chat_about_essay_stream(
+                essay=request.essay,
+                scoring_result=request.scoring_result,
+                history=[m.dict() for m in request.history],
+                message=request.message,
+                language=request.language,
+                provider=request.provider or None,
+                model=request.model or None,
+            ):
+                yield chunk
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            yield f"\n\n[ERROR: {str(e)}]"
+
+    return StreamingResponse(event_generator(), media_type="text/plain")
