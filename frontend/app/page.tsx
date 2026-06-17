@@ -5,7 +5,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, RotateCcw, Clock, ChevronDown } from "lucide-react";
+import {
+  Loader2,
+  RotateCcw,
+  Clock,
+  ChevronDown,
+  ChevronDownIcon,
+} from "lucide-react";
 import { ScoringResponse, Language, CriterionScore } from "@/app/types";
 import { scoreEssay } from "@/app/lib/api";
 import { LANGUAGES, getUIText } from "@/app/lib/languages";
@@ -18,6 +24,11 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import ErrorHighlightedEssay from "@/app/components/ErrorHighlightedEssay";
 import { getSampleEssay } from "@/app/lib/api";
 import { Shuffle } from "lucide-react";
+import {
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+} from "@headlessui/react";
 
 // -------- Form schema --------
 
@@ -70,50 +81,50 @@ export default function Home() {
     useState<string>("openai/gpt-4o-mini");
   const [loadingSample, setLoadingSample] = useState(false);
   // // test result
-  // const mockScoringResult: ScoringResponse = {
-  //   task_achievement: {
-  //     score: 7.0,
-  //     feedback:
-  //       "The essay addresses all parts of the task, though some ideas could be more fully developed. The position is clear throughout.",
-  //   },
-  //   coherence_cohesion: {
-  //     score: 7.5,
-  //     feedback:
-  //       "Information is logically organized with clear progression. Cohesive devices are used appropriately, though occasionally repetitive.",
-  //   },
-  //   lexical_resource: {
-  //     score: 6.5,
-  //     feedback:
-  //       "A sufficient range of vocabulary is used, but some repetition and occasional inaccuracy reduce precision.",
-  //   },
-  //   grammatical_range_accuracy: {
-  //     score: 6.0,
-  //     feedback:
-  //       "There is a mix of simple and complex sentences, but grammatical errors are noticeable and sometimes affect clarity.",
-  //   },
-  //   overall_band: 6.5,
-  //   overall_feedback:
-  //     "The essay demonstrates a generally effective command of the language with some weaknesses in grammar and lexical precision. Ideas are relevant and mostly well organized.",
-  //   latency_ms: 1240,
-  //   similar_essays: [
-  //     {
-  //       overall_band: 7.5,
-  //       examiner_comment:
-  //         "A well-structured essay with strong arguments and effective use of examples. Minor language issues present but do not hinder understanding.",
-  //     },
-  //     {
-  //       overall_band: 6.0,
-  //       examiner_comment:
-  //         "Addresses the task adequately but lacks depth in analysis and contains several grammatical inconsistencies.",
-  //     },
-  //     {
-  //       overall_band: 8.0,
-  //       examiner_comment:
-  //         "Excellent response with clear argumentation, varied vocabulary, and strong cohesion throughout.",
-  //     },
-  //   ],
-  //   text_errors: [],
-  // };
+  /* const mockScoringResult: ScoringResponse = {
+    task_achievement: {
+      score: 7.0,
+      feedback:
+        "The essay addresses all parts of the task, though some ideas could be more fully developed. The position is clear throughout.",
+    },
+    coherence_cohesion: {
+      score: 7.5,
+      feedback:
+        "Information is logically organized with clear progression. Cohesive devices are used appropriately, though occasionally repetitive.",
+    },
+    lexical_resource: {
+      score: 6.5,
+      feedback:
+        "A sufficient range of vocabulary is used, but some repetition and occasional inaccuracy reduce precision.",
+    },
+    grammatical_range_accuracy: {
+      score: 6.0,
+      feedback:
+        "There is a mix of simple and complex sentences, but grammatical errors are noticeable and sometimes affect clarity.",
+    },
+    overall_band: 6.5,
+    overall_feedback:
+      "The essay demonstrates a generally effective command of the language with some weaknesses in grammar and lexical precision. Ideas are relevant and mostly well organized.",
+    latency_ms: 1240,
+    similar_essays: [
+      {
+        overall_band: 7.5,
+        examiner_comment:
+          "A well-structured essay with strong arguments and effective use of examples. Minor language issues present but do not hinder understanding.",
+      },
+      {
+        overall_band: 6.0,
+        examiner_comment:
+          "Addresses the task adequately but lacks depth in analysis and contains several grammatical inconsistencies.",
+      },
+      {
+        overall_band: 8.0,
+        examiner_comment:
+          "Excellent response with clear argumentation, varied vocabulary, and strong cohesion throughout.",
+      },
+    ],
+    text_errors: [],
+  }; */
 
   // -------- Submit --------
 
@@ -451,73 +462,99 @@ export default function Home() {
                   {/* Divider */}
                   <div className="border-t border-[#2A2D3A]" />
 
-                  {/* Error-highlighted essay */}
-                  {result.text_errors.length > 0 && (
-                    <>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                            Your Essay — Errors Highlighted
-                          </span>
-                          <div className="flex items-center gap-3 text-[10px] text-slate-500">
-                            <span className="flex items-center gap-1">
-                              <span className="w-2 h-2 rounded-full bg-orange-400" />{" "}
-                              Grammar
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <span className="w-2 h-2 rounded-full bg-red-400" />{" "}
-                              Spelling
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <span className="w-2 h-2 rounded-full bg-stone-400" />{" "}
-                              Repetition
-                            </span>
-                          </div>
-                        </div>
-                        <div className="bg-[#0F1117] border border-[#2A2D3A] rounded-lg p-4 text-sm text-slate-300">
-                          <ErrorHighlightedEssay
-                            essay={submittedEssay}
-                            errors={result.text_errors}
+                  <div className="mx-auto w-full divide-y divide-white/5 rounded-xl bg-white/1">
+                    <Disclosure as="div" className="p-6" defaultOpen={true}>
+                      <DisclosureButton className="group flex w-full items-center justify-between">
+                        <span className="text-md font-medium text-white group-data-hover:text-white/80">
+                          Criterion cards
+                        </span>
+                        <ChevronDownIcon className="size-5 fill-white/60 group-data-hover:fill-white/50 group-data-open:rotate-180" />
+                      </DisclosureButton>
+                      <DisclosurePanel
+                        transition
+                        className="mt-2 text-sm/5 text-white/50 origin-top transition duration-200 ease-out data-closed:-translate-y-6 data-closed:opacity-0"
+                      >
+                        {/* Criterion cards */}
+                        <div
+                          className={`grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-hidden transition-[max-height,opacity] duration-350 ease-in-out max-h-150 opacity-100
+                          `}
+                        >
+                          <CriterionCard
+                            title={t.taskAchievement}
+                            data={result.task_achievement}
+                            feedbackLabel={t.feedback}
+                          />
+                          <CriterionCard
+                            title={t.coherence}
+                            data={result.coherence_cohesion}
+                            feedbackLabel={t.feedback}
+                          />
+                          <CriterionCard
+                            title={t.lexical}
+                            data={result.lexical_resource}
+                            feedbackLabel={t.feedback}
+                          />
+                          <CriterionCard
+                            title={t.grammar}
+                            data={result.grammatical_range_accuracy}
+                            feedbackLabel={t.feedback}
                           />
                         </div>
-                      </div>
-                      <div className="border-t border-[#2A2D3A]" />
-                    </>
-                  )}
-
-                  {/* Criterion cards */}
-                  <div
-                    className={`grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-hidden transition-[max-height,opacity] duration-350 ease-in-out ${
-                      isChatActive
-                        ? "max-h-0 opacity-0"
-                        : "max-h-150 opacity-100"
-                    }`}
-                  >
-                    <CriterionCard
-                      title={t.taskAchievement}
-                      data={result.task_achievement}
-                      feedbackLabel={t.feedback}
-                    />
-                    <CriterionCard
-                      title={t.coherence}
-                      data={result.coherence_cohesion}
-                      feedbackLabel={t.feedback}
-                    />
-                    <CriterionCard
-                      title={t.lexical}
-                      data={result.lexical_resource}
-                      feedbackLabel={t.feedback}
-                    />
-                    <CriterionCard
-                      title={t.grammar}
-                      data={result.grammatical_range_accuracy}
-                      feedbackLabel={t.feedback}
-                    />
+                      </DisclosurePanel>
+                    </Disclosure>
+                    <Disclosure as="div" className="p-6">
+                      <DisclosureButton className="group flex w-full items-center justify-between">
+                        <span className="text-md font-medium text-white group-data-hover:text-white/80">
+                          Error highlighted essay
+                        </span>
+                        <ChevronDownIcon className="size-5 fill-white/60 group-data-hover:fill-white/50 group-data-open:rotate-180" />
+                      </DisclosureButton>
+                      <DisclosurePanel
+                        transition
+                        className="mt-2 text-sm/5 text-white/50 origin-top transition duration-200 ease-out data-closed:-translate-y-6 data-closed:opacity-0"
+                      >
+                        {/* Error-highlighted essay */}
+                        {result.text_errors.length > 0 && (
+                          <>
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                                  Your Essay — Errors Highlighted
+                                </span>
+                                <div className="flex items-center gap-3 text-[10px] text-slate-500">
+                                  <span className="flex items-center gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-orange-400" />{" "}
+                                    Grammar
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-red-400" />{" "}
+                                    Spelling
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-stone-400" />{" "}
+                                    Repetition
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="bg-[#0F1117] border border-[#2A2D3A] rounded-lg p-4 text-sm text-slate-300">
+                                <ErrorHighlightedEssay
+                                  essay={submittedEssay}
+                                  errors={result.text_errors}
+                                />
+                              </div>
+                            </div>
+                            <div className="border-t border-[#2A2D3A]" />
+                          </>
+                        )}
+                      </DisclosurePanel>
+                    </Disclosure>
                   </div>
                 </div>
 
                 {/* ---- Chat panel ---- */}
-                <div className={`transition-all duration-300 h-full`}>
+                <div
+                  className={`transition-all duration-300 min-w-1/2 lg:sticky lg:top-16 lg:self-stretch max-h-[calc(100vh-75px)]`}
+                >
                   <Chat
                     essay={submittedEssay}
                     scoringResult={result}
@@ -532,20 +569,147 @@ export default function Home() {
                 </div>
               </>
             ) : (
-              /* ---- Empty state ---- */
-              <div className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] h-full flex flex-col items-center justify-center gap-4 p-8">
-                <div className="w-18 h-18 rounded-full border-2 border-dashed border-[#2A2D3A] flex items-center justify-center duration-75">
-                  <div className="w-8 h-8 rounded-full border-2 border-[#3A3D4A]" />
+              <>
+                {/* ---- Essay Form  ---- */}
+                <div className="w-[40%]">
+                  <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-3 space-y-5 h-[calc(100vh-75px)] flex flex-col"
+                  >
+                    {/* Task type */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-slate-500 uppercase tracking-widest">
+                        {t.taskType}
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(["1", "2"] as const).map((type) => {
+                          const isTask1 = type === "1";
+                          return (
+                            <label
+                              key={type}
+                              title={
+                                isTask1
+                                  ? "Task 1 requires a chart image — multimodal support coming soon"
+                                  : ""
+                              }
+                              className={`flex flex-col items-center justify-center p-1 rounded-lg border text-md font-medium transition-all ${
+                                isTask1
+                                  ? "border-[#2A2D3A] text-slate-600 cursor-not-allowed opacity-50"
+                                  : taskType === type
+                                    ? "border-[#C8102E] bg-[#C8102E]/10 text-[#C8102E] cursor-pointer"
+                                    : ""
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                value={type}
+                                disabled={isTask1}
+                                {...register("task_type")}
+                                className="sr-only"
+                              />
+                              {type === "1" ? t.task1 : t.task2}
+                              {isTask1 && (
+                                <span className="text-[9px] text-slate-600 mt-0.5 font-normal">
+                                  coming soon
+                                </span>
+                              )}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Question */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-slate-500 uppercase tracking-widest">
+                        {t.question}
+                      </label>
+                      <textarea
+                        {...register("question")}
+                        placeholder={t.questionPlaceholder}
+                        rows={3}
+                        dir={langInfo!.dir}
+                        className="w-full resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] p-2 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
+                        spellCheck="false"
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                      />
+                      {errors.question && (
+                        <p className="text-xs text-red-400">
+                          {errors.question.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Essay */}
+                    <div className="space-y-2 flex-1 flex flex-col">
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-semibold text-slate-500 uppercase tracking-widest">
+                          {t.essay}
+                        </label>
+                        <span
+                          className={`text-xs font-medium tabular-nums ${
+                            wordCountOk ? "text-green-400" : "text-slate-600"
+                          }`}
+                        >
+                          {wordCount}
+                          {!wordCountOk && (
+                            <span className="text-slate-600 font-normal">
+                              /{minWords}
+                            </span>
+                          )}{" "}
+                          {t.wordCount}
+                        </span>
+                      </div>
+                      <textarea
+                        {...register("essay")}
+                        placeholder={t.essayPlaceholder}
+                        rows={10}
+                        dir={langInfo!.dir}
+                        className="w-full flex-1 resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] p-2 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors font-(--font-geist-mono)"
+                      />
+                      {errors.essay && (
+                        <p className="text-xs text-red-400">
+                          {errors.essay.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Error */}
+                    {error && (
+                      <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                        <p className="text-xs text-red-400">{error}</p>
+                      </div>
+                    )}
+
+                    {/* Submit */}
+                    <div className="flex justify-center items-center gap-2">
+                      <button
+                        type="submit"
+                        disabled={loading || !wordCountOk}
+                        className="w-1/2 mx-auto bg-[#C8102E] text-white rounded-lg py-1 text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            {t.scoring}
+                          </>
+                        ) : (
+                          t.submit
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!isDirty}
+                        className="w-1/2 mx-auto bg-[#C8102E] text-white rounded-lg py-1 text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                        onClick={() => reset()}
+                      >
+                        {t.clear}
+                      </button>
+                    </div>
+                  </form>
                 </div>
-                <div className="text-center space-y-1">
-                  <p className="text-md font-medium text-slate-400">
-                    Your results will appear here
-                  </p>
-                  <p className="text-sm text-slate-600">
-                    Submit your essay to see band scores and feedback
-                  </p>
-                </div>
-              </div>
+              </>
             )}
           </div>
         </div>
