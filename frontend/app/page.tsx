@@ -11,6 +11,7 @@ import {
   Clock,
   ChevronDown,
   ChevronDownIcon,
+  ClipboardPasteIcon,
 } from "lucide-react";
 import { ScoringResponse, Language, CriterionScore } from "@/app/types";
 import { scoreEssay } from "@/app/lib/api";
@@ -64,7 +65,7 @@ export default function Home() {
     watch,
     reset,
     setValue,
-    formState: { errors, isDirty },
+    formState: { errors, isDirty, dirtyFields },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: { task_type: "2", essay: "", question: "" },
@@ -167,8 +168,12 @@ export default function Home() {
     setLoadingSample(true);
     try {
       const sample = await getSampleEssay();
-      setValue("question", sample.question);
-      setValue("essay", sample.essay);
+      setValue("question", sample.question, {
+        shouldDirty: true,
+      });
+      setValue("essay", sample.essay, {
+        shouldDirty: true,
+      });
       setValue("task_type", "2");
     } catch {
       setError("Failed to load sample essay");
@@ -205,36 +210,6 @@ export default function Home() {
         {/* ---- Controls ---- */}
         <div className="flex items-center gap-4">
           <ModelSelector onModelChange={handleModelChange} />
-          {/* <div className="relative shrink-0">
-            <button
-              onClick={() => setLangOpen(!langOpen)}
-              className="flex items-center gap-2 text-sm text-slate-300 hover:text-white bg-[#1A1D27] border border-[#2A2D3A] hover:border-[#C8102E] rounded-lg px-4 py-2 transition-colors font-medium"
-            >
-              {LANGUAGES.find((l) => l.code === language)?.label}
-              <ChevronDown size={11} />
-            </button>
-            {langOpen && (
-              <div className="absolute inset-e-0 top-11 p-2 bg-[#1A1D27] border border-[#2A2D3A] rounded-xl shadow-2xl z-30 min-w-40 overflow-hidden">
-                {LANGUAGES.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => {
-                      localStorage.setItem("lang", lang.code);
-                      setLanguage(lang.code);
-                      setLangOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 text-xs transition-colors rounded-2xl ${
-                      language === lang.code
-                        ? "text-[#C8102E] bg-[#C8102E]/10 font-semibold"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-[#0F1117]"
-                    }`}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div> */}
           <Menu>
             <MenuButton
               onClick={() => setLangOpen(!langOpen)}
@@ -273,12 +248,11 @@ export default function Home() {
 
       {/* ---- Main ---- */}
       <main className="w-full px-3 py-2">
-        <div className="flex justify-center items-center min-h-[calc(100vh-75px)]">
+        <div className="flex justify-center items-stretch min-h-[calc(100vh-75px)]">
           {/* ---- Left: Form ---- */}
-          
 
           {/* ---- Right: Results + Chat ---- */}
-          <div className="flex justify-center items-stretch gap-3 w-full h-screen">
+          <div className="flex justify-center items-stretch gap-3 w-full lg:flex-row flex-col">
             {result ? (
               <>
                 {/* ---- Results panel ---- */}
@@ -406,7 +380,7 @@ export default function Home() {
 
                 {/* ---- Chat panel ---- */}
                 <div
-                  className={`transition-all duration-300 min-w-1/2 lg:sticky lg:top-16 lg:self-stretch max-h-[calc(100vh-75px)]`}
+                  className={`transition-all duration-300 min-w-1/2 lg:sticky lg:top-16 lg:self-stretch lg:max-h-[calc(100vh-75px)] h-full`}
                 >
                   <Chat
                     essay={submittedEssay}
@@ -424,154 +398,194 @@ export default function Home() {
             ) : (
               <>
                 {/* ---- Essay Form  ---- */}
-                <div className="w-[40%]">
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-3 space-y-5 h-[calc(100vh-75px)] flex flex-col"
-            >
-              {/* Sample essay button */}
-              <button
-                type="button"
-                onClick={handleGenerateSample}
-                disabled={loadingSample}
-                className="w-full flex items-center justify-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 border border-dashed border-[#2A2D3A] hover:border-[#3A3D4A] rounded-lg py-2.5 transition-colors disabled:opacity-50"
-              >
-                {loadingSample ? (
-                  <Loader2 size={13} className="animate-spin" />
-                ) : (
-                  <Shuffle size={13} />
-                )}
-                {t.trySample}
-              </button>
-
-              {/* Task type */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                  {t.taskType}
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {(["1", "2"] as const).map((type) => {
-                    const isTask1 = type === "1";
-                    return (
-                      <label
-                        key={type}
-                        title={
-                          isTask1
-                            ? "Task 1 requires a chart image — multimodal support coming soon"
-                            : ""
-                        }
-                        className={`flex flex-col items-center justify-center p-1 rounded-lg border text-md font-medium transition-all ${
-                          isTask1
-                            ? "border-[#2A2D3A] text-slate-600 cursor-not-allowed opacity-50"
-                            : taskType === type
-                              ? "border-[#C8102E] bg-[#C8102E]/10 text-[#C8102E] cursor-pointer"
-                              : "border-[#2A2D3A] text-slate-500 hover:border-[#3A3D4A] hover:text-slate-300 cursor-pointer"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          value={type}
-                          disabled={isTask1}
-                          {...register("task_type")}
-                          className="sr-only"
-                        />
-                        {type === "1" ? t.task1 : t.task2}
-                        {isTask1 && (
-                          <span className="text-[9px] text-slate-600 mt-0.5 font-normal">
-                            coming soon
-                          </span>
-                        )}
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Question */}
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-500 uppercase tracking-widest">
-                  {t.question}
-                </label>
-                <textarea
-                  {...register("question")}
-                  placeholder={t.questionPlaceholder}
-                  rows={3}
-                  dir={langInfo!.dir}
-                  className="w-full resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] p-2 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
-                />
-                {errors.question && (
-                  <p className="text-xs text-red-400">
-                    {errors.question.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Essay */}
-              <div className="space-y-2 flex-1 flex flex-col">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-semibold text-slate-500 uppercase tracking-widest">
-                    {t.essay}
-                  </label>
-                  <span
-                    className={`text-xs font-medium tabular-nums ${
-                      wordCountOk ? "text-green-400" : "text-slate-600"
-                    }`}
+                <div className="w-full lg:w-[40%] md:w-[60%]">
+                  <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-3 space-y-5 h-[calc(100vh-75px)] flex flex-col"
                   >
-                    {wordCount}
-                    {!wordCountOk && (
-                      <span className="text-slate-600 font-normal">
-                        /{minWords}
-                      </span>
-                    )}{" "}
-                    {t.wordCount}
-                  </span>
-                </div>
-                <textarea
-                  {...register("essay")}
-                  placeholder={t.essayPlaceholder}
-                  rows={10}
-                  dir={langInfo!.dir}
-                  className="w-full flex-1 resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] p-2 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors font-(--font-geist-mono)"
-                />
-                {errors.essay && (
-                  <p className="text-xs text-red-400">{errors.essay.message}</p>
-                )}
-              </div>
+                    {/* Sample essay button */}
+                    <button
+                      type="button"
+                      onClick={handleGenerateSample}
+                      disabled={loadingSample}
+                      className="w-full flex items-center justify-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 border border-dashed border-[#2A2D3A] hover:border-[#3A3D4A] rounded-lg py-2.5 transition-colors disabled:opacity-50"
+                    >
+                      {loadingSample ? (
+                        <Loader2 size={13} className="animate-spin" />
+                      ) : (
+                        <Shuffle size={13} />
+                      )}
+                      {t.trySample}
+                    </button>
 
-              {/* Error */}
-              {error && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-                  <p className="text-xs text-red-400">{error}</p>
-                </div>
-              )}
+                    {/* Task type */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                        {t.taskType}
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {(["1", "2"] as const).map((type) => {
+                          const isTask1 = type === "1";
+                          return (
+                            <label
+                              key={type}
+                              title={
+                                isTask1
+                                  ? "Task 1 requires a chart image — multimodal support coming soon"
+                                  : ""
+                              }
+                              className={`flex flex-col items-center justify-center p-1 rounded-lg border text-md font-medium transition-all ${
+                                isTask1
+                                  ? "border-[#2A2D3A] text-slate-600 cursor-not-allowed opacity-50"
+                                  : taskType === type
+                                    ? "border-[#C8102E] bg-[#C8102E]/10 text-[#C8102E] cursor-pointer"
+                                    : "border-[#2A2D3A] text-slate-500 hover:border-[#3A3D4A] hover:text-slate-300 cursor-pointer"
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                value={type}
+                                disabled={isTask1}
+                                {...register("task_type")}
+                                className="sr-only"
+                              />
+                              {type === "1" ? t.task1 : t.task2}
+                              {isTask1 && (
+                                <span className="text-[9px] text-slate-600 mt-0.5 font-normal">
+                                  coming soon
+                                </span>
+                              )}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-              {/* Submit */}
-              <div className="flex justify-center items-center gap-2">
-                <button
-                  type="submit"
-                  disabled={loading || !wordCountOk}
-                  className="w-1/2 mx-auto bg-[#C8102E] text-white rounded-lg py-1 text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 size={14} className="animate-spin" />
-                      {t.scoring}
-                    </>
-                  ) : (
-                    t.submit
-                  )}
-                </button>
-                <button
-                  type="button"
-                  disabled={!isDirty}
-                  className="w-1/2 mx-auto bg-[#C8102E] text-white rounded-lg py-1 text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-                  onClick={() => reset()}
-                >
-                  {t.clear}
-                </button>
-              </div>
-            </form>
-          </div>
+                    {/* Question */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-sm font-semibold text-slate-500 uppercase tracking-widest">
+                          {t.question}
+                        </label>
+                        <div className="relative group inline-flex">
+                          <ClipboardPasteIcon
+                            className="text-slate-500  w-5 h-5 cursor-pointer hover:text-slate-100 transition-all duration-200 ease-in-out"
+                            onClick={async () => {
+                              // Get the value from clipboard (Mojtaba)
+                              const text = await navigator.clipboard.readText();
+                              setValue("question", text, {
+                                shouldDirty: true,
+                              });
+                            }}
+                          />
+
+                          <div className="absolute -top-11 left-1/2 -translate-x-1/2 rounded bg-red-500 px-2 py-2 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
+                            {t.paste}
+                            <div className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-red-500" />
+                          </div>
+                        </div>
+                      </div>
+                      <textarea
+                        {...register("question")}
+                        placeholder={t.questionPlaceholder}
+                        rows={3}
+                        dir={dirtyFields.question ? "ltr" : langInfo!.dir}
+                        className="w-full resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] p-2 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
+                      />
+                      {errors.question && (
+                        <p className="text-xs text-red-400">
+                          {errors.question.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Essay */}
+                    <div className="space-y-2 flex-1 flex flex-col">
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-semibold text-slate-500 uppercase tracking-widest">
+                          {t.essay}
+                        </label>
+                        <div className="flex items-center justify-between gap-2">
+                          <span
+                            className={`text-xs font-medium tabular-nums ${
+                              wordCountOk ? "text-green-400" : "text-slate-600"
+                            }`}
+                          >
+                            {wordCount}
+                            {!wordCountOk && (
+                              <span className="text-slate-600 font-normal">
+                                /{minWords}
+                              </span>
+                            )}{" "}
+                            {t.wordCount}
+                          </span>
+                          <div className="relative group inline-flex">
+                            <ClipboardPasteIcon
+                              className="text-slate-500  w-5 h-5 cursor-pointer hover:text-slate-100 transition-all duration-200 ease-in-out"
+                              onClick={async () => {
+                                // Get the value from clipboard (Mojtaba)
+                                const text =
+                                  await navigator.clipboard.readText();
+                                setValue("essay", text, {
+                                  shouldDirty: true,
+                                });
+                              }}
+                            />
+                            <div className="absolute -top-11 left-1/2 -translate-x-1/2 rounded bg-red-500 px-2 py-2 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
+                              {t.paste}
+                              <div className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-red-500" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <textarea
+                        {...register("essay")}
+                        placeholder={t.essayPlaceholder}
+                        rows={10}
+                        dir={dirtyFields.essay ? "ltr" : langInfo!.dir}
+                        className="w-full flex-1 resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] p-2 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors font-(--font-geist-mono)"
+                      />
+                      {errors.essay && (
+                        <p className="text-xs text-red-400">
+                          {errors.essay.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Error */}
+                    {error && (
+                      <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                        <p className="text-xs text-red-400">{error}</p>
+                      </div>
+                    )}
+
+                    {/* Submit */}
+                    <div className="flex justify-center items-center gap-2">
+                      <button
+                        type="submit"
+                        disabled={loading || !wordCountOk}
+                        className="w-1/2 mx-auto bg-[#C8102E] text-white rounded-lg py-1 text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            {t.scoring}
+                          </>
+                        ) : (
+                          t.submit
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!isDirty}
+                        className="w-1/2 mx-auto bg-[#C8102E] text-white rounded-lg py-1 text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                        onClick={() => reset()}
+                      >
+                        {t.clear}
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </>
             )}
           </div>
