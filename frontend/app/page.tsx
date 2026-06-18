@@ -30,6 +30,7 @@ import {
   DisclosureButton,
   DisclosurePanel,
 } from "@headlessui/react";
+import { useRef, useEffect } from "react";
 
 // -------- Form schema --------
 
@@ -81,6 +82,7 @@ export default function Home() {
   const [selectedModel, setSelectedModel] =
     useState<string>("openai/gpt-4o-mini");
   const [loadingSample, setLoadingSample] = useState(false);
+
   // // test result
   /* const mockScoringResult: ScoringResponse = {
     task_achievement: {
@@ -290,7 +292,7 @@ export default function Home() {
                   <div className="border-t border-[#2A2D3A]" />
 
                   <div className="mx-auto w-full min-h-0 overflow-y-auto divide-y divide-white/5 rounded-xl bg-white/1">
-                    <Disclosure as="div" className="p-6" defaultOpen={true}>
+                    <Disclosure as="div" className="p-6" defaultOpen>
                       <DisclosureButton className="group flex w-full items-center justify-between">
                         <span className="text-md font-medium text-white group-data-hover:text-white/80">
                           Criterion cards
@@ -329,7 +331,7 @@ export default function Home() {
                         </div>
                       </DisclosurePanel>
                     </Disclosure>
-                    <Disclosure as="div" className="p-6">
+                    <Disclosure as="div" className="p-6" defaultOpen>
                       <DisclosureButton className="group flex w-full items-center justify-between">
                         <span className="text-md font-medium text-white group-data-hover:text-white/80">
                           Error highlighted essay

@@ -34,10 +34,6 @@ export default function Chat({
   const bottomRef = useRef<HTMLDivElement>(null);
   const revealQueueRef = useRef("");
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [history]);
-
   // ---- Gradually reveal queued characters for a smoother streaming feel ----
   useEffect(() => {
     const interval = setInterval(() => {
