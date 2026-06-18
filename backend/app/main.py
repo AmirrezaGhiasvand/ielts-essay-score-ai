@@ -12,7 +12,7 @@ load_dotenv()
 # -------- Settings --------
 
 APP_ENV  = os.getenv("APP_ENV", "development")
-APP_PORT = int(os.getenv("APP_PORT", 8000))
+APP_PORT = int(os.getenv("APP_PORT", 9000))
 
 
 # -------- Startup --------
@@ -97,7 +97,7 @@ app = FastAPI(
 # allow Next.js frontend to talk to the API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3200"],
+    allow_origins=["http://localhost:3000", "http://localhost:3200", "http://localhost:9000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
