@@ -11,6 +11,7 @@ import {
   Clock,
   ChevronDown,
   ChevronDownIcon,
+  ClipboardPasteIcon,
 } from "lucide-react";
 import { ScoringResponse, Language, CriterionScore } from "@/app/types";
 import { scoreEssay } from "@/app/lib/api";
@@ -167,8 +168,12 @@ export default function Home() {
     setLoadingSample(true);
     try {
       const sample = await getSampleEssay();
-      setValue("question", sample.question);
-      setValue("essay", sample.essay);
+      setValue("question", sample.question, {
+        shouldDirty: true,
+      });
+      setValue("essay", sample.essay, {
+        shouldDirty: true,
+      });
       setValue("task_type", "2");
     } catch {
       setError("Failed to load sample essay");
@@ -205,36 +210,6 @@ export default function Home() {
         {/* ---- Controls ---- */}
         <div className="flex items-center gap-4">
           <ModelSelector onModelChange={handleModelChange} />
-          {/* <div className="relative shrink-0">
-            <button
-              onClick={() => setLangOpen(!langOpen)}
-              className="flex items-center gap-2 text-sm text-slate-300 hover:text-white bg-[#1A1D27] border border-[#2A2D3A] hover:border-[#C8102E] rounded-lg px-4 py-2 transition-colors font-medium"
-            >
-              {LANGUAGES.find((l) => l.code === language)?.label}
-              <ChevronDown size={11} />
-            </button>
-            {langOpen && (
-              <div className="absolute inset-e-0 top-11 p-2 bg-[#1A1D27] border border-[#2A2D3A] rounded-xl shadow-2xl z-30 min-w-40 overflow-hidden">
-                {LANGUAGES.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => {
-                      localStorage.setItem("lang", lang.code);
-                      setLanguage(lang.code);
-                      setLangOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 text-xs transition-colors rounded-2xl ${
-                      language === lang.code
-                        ? "text-[#C8102E] bg-[#C8102E]/10 font-semibold"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-[#0F1117]"
-                    }`}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div> */}
           <Menu>
             <MenuButton
               onClick={() => setLangOpen(!langOpen)}
@@ -488,9 +463,28 @@ export default function Home() {
 
                     {/* Question */}
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-slate-500 uppercase tracking-widest">
-                        {t.question}
-                      </label>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-sm font-semibold text-slate-500 uppercase tracking-widest">
+                          {t.question}
+                        </label>
+                        <div className="relative group inline-flex">
+                          <ClipboardPasteIcon
+                            className="text-slate-500  w-5 h-5 cursor-pointer hover:text-slate-100 transition-all duration-200 ease-in-out"
+                            onClick={async () => {
+                              // Get the value from clipboard (Mojtaba)
+                              const text = await navigator.clipboard.readText();
+                              setValue("question", text, {
+                                shouldDirty: true,
+                              });
+                            }}
+                          />
+
+                          <div className="absolute -top-11 left-1/2 -translate-x-1/2 rounded bg-red-500 px-2 py-2 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
+                            {t.paste}
+                            <div className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-red-500" />
+                          </div>
+                        </div>
+                      </div>
                       <textarea
                         {...register("question")}
                         placeholder={t.questionPlaceholder}
@@ -511,19 +505,38 @@ export default function Home() {
                         <label className="text-sm font-semibold text-slate-500 uppercase tracking-widest">
                           {t.essay}
                         </label>
-                        <span
-                          className={`text-xs font-medium tabular-nums ${
-                            wordCountOk ? "text-green-400" : "text-slate-600"
-                          }`}
-                        >
-                          {wordCount}
-                          {!wordCountOk && (
-                            <span className="text-slate-600 font-normal">
-                              /{minWords}
-                            </span>
-                          )}{" "}
-                          {t.wordCount}
-                        </span>
+                        <div className="flex items-center justify-between gap-2">
+                          <span
+                            className={`text-xs font-medium tabular-nums ${
+                              wordCountOk ? "text-green-400" : "text-slate-600"
+                            }`}
+                          >
+                            {wordCount}
+                            {!wordCountOk && (
+                              <span className="text-slate-600 font-normal">
+                                /{minWords}
+                              </span>
+                            )}{" "}
+                            {t.wordCount}
+                          </span>
+                          <div className="relative group inline-flex">
+                            <ClipboardPasteIcon
+                              className="text-slate-500  w-5 h-5 cursor-pointer hover:text-slate-100 transition-all duration-200 ease-in-out"
+                              onClick={async () => {
+                                // Get the value from clipboard (Mojtaba)
+                                const text =
+                                  await navigator.clipboard.readText();
+                                setValue("essay", text, {
+                                  shouldDirty: true,
+                                });
+                              }}
+                            />
+                            <div className="absolute -top-11 left-1/2 -translate-x-1/2 rounded bg-red-500 px-2 py-2 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
+                              {t.paste}
+                              <div className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-red-500" />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                       <textarea
                         {...register("essay")}

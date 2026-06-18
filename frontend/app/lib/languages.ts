@@ -30,7 +30,7 @@ export const UI_TEXT = {
     wordCount: "words",
     minWords: "Minimum",
     submit: "Score My Essay",
-    trySample:        "Try a Sample Essay",
+    trySample: "Try a Sample Essay",
     scoring: "Scoring your essay...",
     overall: "Overall Band",
     taskAchievement: "Task Achievement",
@@ -47,7 +47,8 @@ export const UI_TEXT = {
     errorShort: "Essay too short",
     errorGeneral: "Something went wrong. Please try again.",
     language: "Response Language",
-    clear:"Clear",
+    clear: "Clear",
+    paste: "Paste",
   },
   fa: {
     title: "نمره‌دهی مقاله آیلتس",
@@ -79,7 +80,8 @@ export const UI_TEXT = {
     errorShort: "مقاله خیلی کوتاه است",
     errorGeneral: "مشکلی پیش آمد. لطفاً دوباره تلاش کنید.",
     language: "زبان پاسخ",
-    clear:"پاکسازی",
+    clear: "پاکسازی",
+    paste: "الصاق",
   },
 } as const;
 
