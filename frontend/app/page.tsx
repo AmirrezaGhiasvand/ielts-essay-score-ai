@@ -380,15 +380,6 @@ export default function Home() {
                           </DisclosurePanel>
                         </Disclosure>
                       )}
-
-                      <button
-                        type="button"
-                        onClick={handleExamTopic}
-                        disabled={loadingSample}
-                        className="w-full flex items-center justify-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 border border-dashed border-[#2A2D3A] hover:border-[#3A3D4A] rounded-lg py-2.5 transition-colors disabled:opacity-50"
-                      >
-                        {t.examTopic}
-                      </button>
                     </div>
                   </div>
 
@@ -418,20 +409,30 @@ export default function Home() {
                       className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-3 space-y-5 h-[calc(100vh-75px)] flex flex-col"
                     >
                       {/* Sample essay button */}
-                      <button
-                        type="button"
-                        onClick={handleGenerateSample}
-                        disabled={loadingSample}
-                        className="w-full flex items-center justify-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 border border-dashed border-[#2A2D3A] hover:border-[#3A3D4A] rounded-lg py-2.5 transition-colors disabled:opacity-50"
-                      >
-                        {loadingSample ? (
-                          <Loader2 size={13} className="animate-spin" />
-                        ) : (
-                          <Shuffle size={13} />
-                        )}
-                        {t.trySample}
-                      </button>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={handleGenerateSample}
+                          disabled={loadingSample}
+                          className="w-full flex items-center justify-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 border border-dashed border-[#2A2D3A] hover:border-[#3A3D4A] rounded-lg py-2.5 transition-colors disabled:opacity-50"
+                        >
+                          {loadingSample ? (
+                            <Loader2 size={13} className="animate-spin" />
+                          ) : (
+                            <Shuffle size={13} />
+                          )}
+                          {t.trySample}
+                        </button>
 
+                        <button
+                          type="button"
+                          onClick={handleExamTopic}
+                          disabled={loadingSample}
+                          className="w-full flex items-center justify-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 border border-dashed border-[#2A2D3A] hover:border-[#3A3D4A] rounded-lg py-2.5 transition-colors disabled:opacity-50"
+                        >
+                          {t.examTopic}
+                        </button>
+                      </div>
                       {/* Task type */}
                       <div className="space-y-2">
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
@@ -502,6 +503,7 @@ export default function Home() {
                         </div>
                         <textarea
                           {...register("question")}
+                          spellCheck={false}
                           placeholder={t.questionPlaceholder}
                           rows={3}
                           dir={dirtyFields.question ? "ltr" : langInfo!.dir}
@@ -557,6 +559,7 @@ export default function Home() {
                         </div>
                         <textarea
                           {...register("essay")}
+                          spellCheck={false}
                           placeholder={t.essayPlaceholder}
                           rows={10}
                           dir={dirtyFields.essay ? "ltr" : langInfo!.dir}
