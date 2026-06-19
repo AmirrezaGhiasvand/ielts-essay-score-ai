@@ -147,11 +147,11 @@ export default function ErrorHighlightedEssay({
         </span>
 
         {activeSpan === i && (
-          <span className="absolute bottom-full left-0 mb-3 w-72 bg-[#1A1D27] border border-[#2A2D3A] rounded-lg p-3 shadow-2xl z-50 text-xs normal-case">
+          <span className="absolute bottom-full left-0 mb-3 w-72 bg-foreground border border-border rounded-lg p-3 shadow-2xl z-50 text-xs normal-case ">
             {span.errors.map((err, ei) => (
               <div
                 key={ei}
-                className={ei > 0 ? "mt-2 pt-2 border-t border-[#2A2D3A]" : ""}
+                className={ei > 0 ? "mt-2 pt-2 border-t border-border" : ""}
               >
                 <div className="flex items-center gap-1.5 mb-1">
                   <span
@@ -163,7 +163,7 @@ export default function ErrorHighlightedEssay({
                           : "bg-stone-400"
                     }`}
                   />
-                  <span className="font-semibold text-slate-300 uppercase tracking-wide text-[10px]">
+                  <span className="font-semibold text-text uppercase tracking-wide text-[10px]">
                     {err.error_type}
                   </span>
                 </div>
@@ -174,7 +174,7 @@ export default function ErrorHighlightedEssay({
                   {" → "}
                   <span className="text-green-400">{err.correction}</span>
                 </p>
-                <p className="text-slate-500 mt-1">{err.explanation}</p>
+                <p className="text-text/60 mt-1">{err.explanation}</p>
               </div>
             ))}
           </span>

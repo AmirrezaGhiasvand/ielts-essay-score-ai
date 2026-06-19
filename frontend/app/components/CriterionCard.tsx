@@ -4,47 +4,53 @@ import { CriterionScore } from "@/app/types";
 import ReactMarkdown from "react-markdown";
 
 interface CriterionCardProps {
-  title:         string;
-  data:          CriterionScore;
+  title: string;
+  data: CriterionScore;
   feedbackLabel: string;
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 8)  return "text-green-400 bg-green-400/10 border-green-400/20";
-  if (score >= 7)  return "text-blue-400 bg-blue-400/10 border-blue-400/20";
-  if (score >= 6)  return "text-amber-400 bg-amber-400/10 border-amber-400/20";
-  if (score >= 5)  return "text-orange-400 bg-orange-400/10 border-orange-400/20";
-  return                  "text-red-400 bg-red-400/10 border-red-400/20";
+  if (score >= 8) return "text-green-400 bg-green-400/10 border-green-400/20";
+  if (score >= 7) return "text-blue-400 bg-blue-400/10 border-blue-400/20";
+  if (score >= 6) return "text-amber-400 bg-amber-400/10 border-amber-400/20";
+  if (score >= 5)
+    return "text-orange-400 bg-orange-400/10 border-orange-400/20";
+  return "text-red-400 bg-red-400/10 border-red-400/20";
 }
 
 function getBarColor(score: number): string {
-  if (score >= 8)  return "bg-green-400";
-  if (score >= 7)  return "bg-blue-400";
-  if (score >= 6)  return "bg-amber-400";
-  if (score >= 5)  return "bg-orange-400";
-  return                  "bg-red-400";
+  if (score >= 8) return "bg-green-400";
+  if (score >= 7) return "bg-blue-400";
+  if (score >= 6) return "bg-amber-400";
+  if (score >= 5) return "bg-orange-400";
+  return "bg-red-400";
 }
 
-export default function CriterionCard({ title, data, feedbackLabel }: CriterionCardProps) {
+export default function CriterionCard({
+  title,
+  data,
+  feedbackLabel,
+}: CriterionCardProps) {
   const scoreColorClass = getScoreColor(data.score);
-  const barColorClass   = getBarColor(data.score);
-  const barWidth        = `${(data.score / 9) * 100}%`;
+  const barColorClass = getBarColor(data.score);
+  const barWidth = `${(data.score / 9) * 100}%`;
 
   return (
-    <div className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-4 space-y-3 hover:border-[#3A3D4A] transition-colors">
-
+    <div className="bg-foreground rounded-xl border-2 border-border/30 p-4 space-y-3 hover:border-primary transition-color">
       {/* ---- Header ---- */}
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-semibold text-slate-300 uppercase tracking-wide flex-1 min-w-0 truncate">
+        <span className="text-xs font-semibold text-text uppercase tracking-wide flex-1 min-w-0 truncate">
           {title}
         </span>
-        <span className={`text-sm font-bold px-2 py-0.5 rounded-md border flex-shrink-0 ${scoreColorClass}`}>
+        <span
+          className={`text-sm font-bold px-2 py-0.5 rounded-md border flex-shrink-0 ${scoreColorClass}`}
+        >
           {data.score.toFixed(1)}
         </span>
       </div>
 
       {/* ---- Progress bar ---- */}
-      <div className="h-1 bg-[#2A2D3A] rounded-full overflow-hidden">
+      <div className="h-1 bg-background rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-1000 ease-out ${barColorClass}`}
           style={{ width: barWidth }}
@@ -52,10 +58,9 @@ export default function CriterionCard({ title, data, feedbackLabel }: CriterionC
       </div>
 
       {/* ---- Feedback ---- */}
-      <div className="text-xs text-slate-400 leading-relaxed prose prose-invert prose-xs max-w-none">
+      <div className="text-xs text-text/60 leading-relaxed prose prose-invert prose-xs max-w-none">
         <ReactMarkdown>{data.feedback}</ReactMarkdown>
       </div>
-
     </div>
   );
 }

@@ -5,12 +5,6 @@ import { LanguageOption } from "@/app/types";
 export const LANGUAGES: LanguageOption[] = [
   { code: "en", label: "English", dir: "ltr" },
   { code: "fa", label: "فارسی", dir: "rtl" },
-  { code: "ar", label: "العربية", dir: "rtl" },
-  { code: "zh", label: "中文", dir: "ltr" },
-  { code: "fr", label: "Français", dir: "ltr" },
-  { code: "de", label: "Deutsch", dir: "ltr" },
-  { code: "es", label: "Español", dir: "ltr" },
-  { code: "tr", label: "Türkçe", dir: "ltr" },
 ];
 
 // -------- UI translations --------
@@ -49,7 +43,13 @@ export const UI_TEXT = {
     language: "Response Language",
     clear: "Clear",
     paste: "Paste",
-    examTopic: "Enter test exam mode",
+    examTopic: "Enter Test Exam Mode",
+    loading: [
+      "Loading Models...",
+      "Evaluating Essay...",
+      "Finding Errors...",
+      "Preparing The Results...",
+    ],
   },
   fa: {
     title: "نمره‌دهی مقاله آیلتس",
@@ -84,6 +84,12 @@ export const UI_TEXT = {
     clear: "پاکسازی",
     paste: "جایگذاری",
     examTopic: "ورود به آزمون تستی",
+    loading: [
+      "بارگذاری مدل...",
+      "بررسی متن...",
+      "یافتن غلط ها...",
+      "آماده سازی نتایج...",
+    ],
   },
 } as const;
 

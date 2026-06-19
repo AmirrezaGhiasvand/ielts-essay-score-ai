@@ -217,7 +217,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0F1117]" dir={langInfo!.dir}>
+    <div className="min-h-screen bg-background" dir={langInfo!.dir}>
       {/* ---- Header ---- */}
       <MainHeader
         title={t.title}
@@ -258,7 +258,7 @@ export default function Home() {
               {result ? (
                 <>
                   {/* ---- Results panel ---- */}
-                  <div className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-5 space-y-5">
+                  <div className="bg-background rounded-xl border-2 border-border p-5 space-y-5">
                     {/* Overall band */}
                     <div className="flex items-start gap-6 flex-wrap">
                       <BandGauge
@@ -294,7 +294,7 @@ export default function Home() {
                     {/* Divider */}
                     <div className="border-t border-[#2A2D3A]" />
 
-                    <div className="mx-auto w-full min-h-0 overflow-y-auto divide-y divide-white/5 rounded-xl bg-white/1">
+                    <div className="mx-auto w-full min-h-0 overflow-visible divide-y divide-white/5 rounded-xl bg-white/1">
                       <Disclosure as="div" className="p-6" defaultOpen>
                         <DisclosureButton className="group flex w-full items-center justify-between">
                           <span className="text-md font-medium text-white group-data-hover:text-white/80">
@@ -406,7 +406,7 @@ export default function Home() {
                   <div className="w-full lg:w-[40%] md:w-[60%] mx-auto">
                     <form
                       onSubmit={handleSubmit(onSubmit)}
-                      className="bg-[#1A1D27] rounded-xl border border-[#2A2D3A] p-3 space-y-5 h-[calc(100vh-75px)] flex flex-col"
+                      className="bg-background rounded-xl border border-[#2A2D3A] p-3 space-y-5 h-[calc(100vh-75px)] flex flex-col"
                     >
                       {/* Sample essay button */}
                       <div className="grid grid-cols-2 gap-2">
