@@ -20,6 +20,7 @@ import Chat from "@/app/components/Chat";
 import ReactMarkdown from "react-markdown";
 import ErrorHighlightedEssay from "@/app/components/ErrorHighlightedEssay";
 import { getSampleEssay } from "@/app/lib/api";
+import { getExamTopic } from "@/app/lib/api";
 import { Shuffle } from "lucide-react";
 import {
   Disclosure,
@@ -197,6 +198,18 @@ export default function Home() {
     }
   }
 
+  async function handleExamTopic() {
+    try {
+      const sample = await getExamTopic();
+      setValue("question", sample.question, {
+        shouldDirty: true,
+      });
+      setValue("task_type", "2");
+    } catch {
+      setError("Failed to load exam topic");
+    }
+  }
+
   // --------- Change --------
   function handleModelChange(provider: string, modelId: string) {
     setSelectedProvider(provider);
@@ -367,6 +380,15 @@ export default function Home() {
                           </DisclosurePanel>
                         </Disclosure>
                       )}
+
+                      <button
+                        type="button"
+                        onClick={handleExamTopic}
+                        disabled={loadingSample}
+                        className="w-full flex items-center justify-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 border border-dashed border-[#2A2D3A] hover:border-[#3A3D4A] rounded-lg py-2.5 transition-colors disabled:opacity-50"
+                      >
+                        {t.examTopic}
+                      </button>
                     </div>
                   </div>
 

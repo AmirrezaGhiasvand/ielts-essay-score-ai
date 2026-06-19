@@ -49,6 +49,7 @@ export const UI_TEXT = {
     language: "Response Language",
     clear: "Clear",
     paste: "Paste",
+    examTopic: "Enter test exam mode",
   },
   fa: {
     title: "نمره‌دهی مقاله آیلتس",
@@ -81,7 +82,8 @@ export const UI_TEXT = {
     errorGeneral: "مشکلی پیش آمد. لطفاً دوباره تلاش کنید.",
     language: "زبان پاسخ",
     clear: "پاکسازی",
-    paste: "الصاق",
+    paste: "جایگذاری",
+    examTopic: "ورود به آزمون تستی",
   },
 } as const;
 
