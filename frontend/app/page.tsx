@@ -24,6 +24,7 @@ import { FaGithub } from "react-icons/fa";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import ErrorHighlightedEssay from "@/app/components/ErrorHighlightedEssay";
 import { getSampleEssay } from "@/app/lib/api";
+import { getExamTopic } from "@/app/lib/api";
 import { Shuffle } from "lucide-react";
 import {
   Disclosure,
@@ -181,6 +182,18 @@ export default function Home() {
       setError("Failed to load sample essay");
     } finally {
       setLoadingSample(false);
+    }
+  }
+
+  async function handleExamTopic() {
+    try {
+      const sample = await getExamTopic();
+      setValue("question", sample.question, {
+        shouldDirty: true,
+      });
+      setValue("task_type", "2");
+    } catch {
+      setError("Failed to load exam topic");
     }
   }
 
@@ -418,6 +431,15 @@ export default function Home() {
                         <Shuffle size={13} />
                       )}
                       {t.trySample}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleExamTopic}
+                      disabled={loadingSample}
+                      className="w-full flex items-center justify-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 border border-dashed border-[#2A2D3A] hover:border-[#3A3D4A] rounded-lg py-2.5 transition-colors disabled:opacity-50"
+                    >
+                      {t.examTopic}
                     </button>
 
                     {/* Task type */}

@@ -50,6 +50,15 @@ export async function getSampleEssay(): Promise<SampleEssay> {
   return response.data;
 }
 
+export interface ExamTopic {
+  question: string;
+}
+
+export async function getExamTopic(): Promise<ExamTopic> {
+  const response = await client.get<ExamTopic>("/api/exam-topic");
+  return response.data;
+}
+
 // -------- Models --------
 
 export interface ModelOption {
