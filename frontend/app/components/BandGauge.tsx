@@ -74,7 +74,7 @@ export default function BandGauge({ score, size = 160, label }: BandGaugeProps) 
         <path
           d={describeArc(startAngle, endAngle)}
           fill="none"
-          stroke="#2A2D3A"
+          stroke="var(--foreground)"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
         />
@@ -109,14 +109,14 @@ export default function BandGauge({ score, size = 160, label }: BandGaugeProps) 
           textAnchor="middle"
           dominantBaseline="middle"
           fontSize={size * 0.09}
-          fill="#64748B"
+          fill="#f2f1e7a0"
           fontFamily="var(--font-geist-sans), system-ui"
         >
           {getBandLabel(score)}
         </text>
       </svg>
       {label && (
-        <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+        <span className="text-xs font-medium text-text uppercase tracking-wider">
           {label}
         </span>
       )}

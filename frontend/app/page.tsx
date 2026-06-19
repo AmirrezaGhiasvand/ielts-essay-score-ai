@@ -234,15 +234,10 @@ export default function Home() {
       <main className="w-full px-3 py-2">
         {/* Loading */}
         {loading ? (
-          <div className="min-h-[calc(100vh-75px)] flex justify-center items-center">
+          <div className="min-h-[calc(100vh-75px)] flex justify-center items-center text-text">
             <TextType
               className="text-3xl"
-              text={[
-                "Loading models...",
-                "Evaluating essay...",
-                "Finding errors...",
-                "Finallizing the results...",
-              ]}
+              text={[...t.loading]}
               typingSpeed={75}
               pauseDuration={1500}
               showCursor
@@ -267,13 +262,13 @@ export default function Home() {
                         label={t.overall}
                       />
                       <div className="flex-1 min-w-50 space-y-3 pt-2">
-                        <div className="text-sm text-slate-300 leading-relaxed prose prose-invert prose-sm max-w-none">
+                        <div className="text-sm text-text leading-relaxed prose prose-invert prose-sm max-w-none">
                           <ReactMarkdown>
                             {result.overall_feedback}
                           </ReactMarkdown>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                          <div className="flex items-center gap-1.5 text-xs text-text/60">
                             <Clock size={11} />
                             <span>
                               {t.latency}{" "}
@@ -282,7 +277,7 @@ export default function Home() {
                           </div>
                           <button
                             onClick={handleReset}
-                            className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 border border-[#2A2D3A] hover:border-[#3A3D4A] rounded-lg px-3 py-1.5 transition-colors"
+                            className="flex items-center bg-foreground gap-1.5 text-xs text-text/80 hover:text-text border-2 border-border hover:border-border hover:bg-primary rounded-lg px-3 py-1.5 transition-colors"
                           >
                             <RotateCcw size={11} />
                             {t.newEssay}
@@ -292,19 +287,19 @@ export default function Home() {
                     </div>
 
                     {/* Divider */}
-                    <div className="border-t border-[#2A2D3A]" />
+                    <div className="border-t border-foreground" />
 
-                    <div className="mx-auto w-full min-h-0 overflow-visible divide-y divide-white/5 rounded-xl bg-white/1">
+                    <div className="mx-auto w-full min-h-0 overflow-visible divide-y divide-foreground rounded-xl bg-primary/5">
                       <Disclosure as="div" className="p-6" defaultOpen>
                         <DisclosureButton className="group flex w-full items-center justify-between">
-                          <span className="text-md font-medium text-white group-data-hover:text-white/80">
+                          <span className="text-md font-medium text-text group-data-hover:text-text/80">
                             Criterion cards
                           </span>
-                          <ChevronDownIcon className="size-5 fill-white/60 group-data-hover:fill-white/50 group-data-open:rotate-180" />
+                          <ChevronDownIcon className="size-5 fill-text group-data-hover:fill-text group-data-open:rotate-180" />
                         </DisclosureButton>
                         <DisclosurePanel
                           transition
-                          className="mt-2 text-sm/5 text-white/50 origin-top transition duration-200 ease-out data-closed:-translate-y-6 data-closed:opacity-0"
+                          className="mt-2 text-sm/5 text-text origin-top transition duration-200 ease-out data-closed:-translate-y-6 data-closed:opacity-0 "
                         >
                           {/* Criterion cards */}
                           <div
@@ -338,22 +333,22 @@ export default function Home() {
                       {result.text_errors.length > 0 && (
                         <Disclosure as="div" className="p-6" defaultOpen>
                           <DisclosureButton className="group flex w-full items-center justify-between">
-                            <span className="text-md font-medium text-white group-data-hover:text-white/80">
+                            <span className="text-md font-medium text-text group-data-hover:text-text">
                               Error highlighted essay
                             </span>
-                            <ChevronDownIcon className="size-5 fill-white/60 group-data-hover:fill-white/50 group-data-open:rotate-180" />
+                            <ChevronDownIcon className="size-5 fill-text group-data-hover:fill-text group-data-open:rotate-180" />
                           </DisclosureButton>
                           <DisclosurePanel
                             transition
-                            className="mt-2 text-sm/5 text-white/50 origin-top transition duration-200 ease-out data-closed:-translate-y-6 data-closed:opacity-0"
+                            className="mt-2 text-sm/5 text-text origin-top transition duration-200 ease-out data-closed:-translate-y-6 data-closed:opacity-0 "
                           >
                             <>
                               <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                                  <span className="text-xs font-semibold text-text/70 uppercase tracking-widest">
                                     Your Essay — Errors Highlighted
                                   </span>
-                                  <div className="flex items-center gap-3 text-[10px] text-slate-500">
+                                  <div className="flex items-center gap-3 text-[10px] text-text/70">
                                     <span className="flex items-center gap-1">
                                       <span className="w-2 h-2 rounded-full bg-orange-400" />{" "}
                                       Grammar
@@ -368,14 +363,14 @@ export default function Home() {
                                     </span>
                                   </div>
                                 </div>
-                                <div className="bg-[#0F1117] border border-[#2A2D3A] rounded-lg p-4 text-sm text-slate-300">
+                                <div className="bg-background border border-foreground rounded-lg p-4 text-sm text-text/90">
                                   <ErrorHighlightedEssay
                                     essay={submittedEssay}
                                     errors={result.text_errors}
                                   />
                                 </div>
                               </div>
-                              <div className="border-t border-[#2A2D3A]" />
+                              <div className="border-t border-foreground" />
                             </>
                           </DisclosurePanel>
                         </Disclosure>
@@ -406,7 +401,7 @@ export default function Home() {
                   <div className="w-full lg:w-[40%] md:w-[60%] mx-auto">
                     <form
                       onSubmit={handleSubmit(onSubmit)}
-                      className="bg-background rounded-xl border border-[#2A2D3A] p-3 space-y-5 h-[calc(100vh-75px)] flex flex-col"
+                      className="bg-background rounded-xl border border-foreground p-3 space-y-5 h-[calc(100vh-75px)] flex flex-col"
                     >
                       {/* Sample essay button */}
                       <div className="grid grid-cols-2 gap-2">
@@ -414,7 +409,7 @@ export default function Home() {
                           type="button"
                           onClick={handleGenerateSample}
                           disabled={loadingSample}
-                          className="w-full flex items-center justify-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 border border-dashed border-[#2A2D3A] hover:border-[#3A3D4A] rounded-lg py-2.5 transition-colors disabled:opacity-50"
+                          className="w-full flex items-center justify-center gap-2 text-xs font-medium text-text/60 hover:text-text border border-dashed border-foreground hover:border-border rounded-lg py-2.5 transition-colors disabled:opacity-50"
                         >
                           {loadingSample ? (
                             <Loader2 size={13} className="animate-spin" />
@@ -428,14 +423,14 @@ export default function Home() {
                           type="button"
                           onClick={handleExamTopic}
                           disabled={loadingSample}
-                          className="w-full flex items-center justify-center gap-2 text-xs font-medium text-slate-400 hover:text-slate-200 border border-dashed border-[#2A2D3A] hover:border-[#3A3D4A] rounded-lg py-2.5 transition-colors disabled:opacity-50"
+                          className="w-full flex items-center justify-center gap-2 text-xs font-medium text-text/60 hover:text-text border border-dashed border-foreground hover:border-border rounded-lg py-2.5 transition-colors disabled:opacity-50"
                         >
                           {t.examTopic}
                         </button>
                       </div>
                       {/* Task type */}
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                        <label className="text-xs font-semibold text-text/50 uppercase tracking-widest">
                           {t.taskType}
                         </label>
                         <div className="grid grid-cols-2 gap-2">
@@ -451,10 +446,10 @@ export default function Home() {
                                 }
                                 className={`flex flex-col items-center justify-center p-1 rounded-lg border text-md font-medium transition-all ${
                                   isTask1
-                                    ? "border-[#2A2D3A] text-slate-600 cursor-not-allowed opacity-50"
+                                    ? "border-foreground text-text/6 cursor-not-allowed opacity-50"
                                     : taskType === type
-                                      ? "border-[#C8102E] bg-[#C8102E]/10 text-[#C8102E] cursor-pointer"
-                                      : "border-[#2A2D3A] text-slate-500 hover:border-[#3A3D4A] hover:text-slate-300 cursor-pointer"
+                                      ? "border-foreground bg-primary text-secondary cursor-pointer"
+                                      : "border-foreground text-text/50 hover:border-border hover:text-text cursor-pointer"
                                 }`}
                               >
                                 <input
@@ -466,7 +461,7 @@ export default function Home() {
                                 />
                                 {type === "1" ? t.task1 : t.task2}
                                 {isTask1 && (
-                                  <span className="text-[9px] text-slate-600 mt-0.5 font-normal">
+                                  <span className="text-[9px] text-text/6 mt-0.5 font-normal">
                                     coming soon
                                   </span>
                                 )}
@@ -479,12 +474,12 @@ export default function Home() {
                       {/* Question */}
                       <div className="space-y-2">
                         <div className="flex justify-between items-center mb-2">
-                          <label className="text-sm font-semibold text-slate-500 uppercase tracking-widest">
+                          <label className="text-sm font-semibold text-text/50 uppercase tracking-widest">
                             {t.question}
                           </label>
                           <div className="relative group inline-flex">
                             <ClipboardPasteIcon
-                              className="text-slate-500  w-5 h-5 cursor-pointer hover:text-slate-100 transition-all duration-200 ease-in-out"
+                              className="text-text/50  w-5 h-5 cursor-pointer hover:text-slate-100 transition-all duration-200 ease-in-out"
                               onClick={async () => {
                                 // Get the value from clipboard (Mojtaba)
                                 const text =
@@ -507,7 +502,7 @@ export default function Home() {
                           placeholder={t.questionPlaceholder}
                           rows={3}
                           dir={dirtyFields.question ? "ltr" : langInfo!.dir}
-                          className="w-full resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] p-2 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
+                          className="w-full resize-none rounded-lg bg-[#0F1117] border border-foreground p-2 text-base text-slate-200 placeholder:text-text/6 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
                         />
                         {errors.question && (
                           <p className="text-xs text-red-400">
@@ -519,7 +514,7 @@ export default function Home() {
                       {/* Essay */}
                       <div className="space-y-2 flex-1 flex flex-col">
                         <div className="flex items-center justify-between">
-                          <label className="text-sm font-semibold text-slate-500 uppercase tracking-widest">
+                          <label className="text-sm font-semibold text-text/50 uppercase tracking-widest">
                             {t.essay}
                           </label>
                           <div className="flex items-center justify-between gap-2">
@@ -527,12 +522,12 @@ export default function Home() {
                               className={`text-xs font-medium tabular-nums ${
                                 wordCountOk
                                   ? "text-green-400"
-                                  : "text-slate-600"
+                                  : "text-text/6"
                               }`}
                             >
                               {wordCount}
                               {!wordCountOk && (
-                                <span className="text-slate-600 font-normal">
+                                <span className="text-text/6 font-normal">
                                   /{minWords}
                                 </span>
                               )}{" "}
@@ -540,7 +535,7 @@ export default function Home() {
                             </span>
                             <div className="relative group inline-flex">
                               <ClipboardPasteIcon
-                                className="text-slate-500  w-5 h-5 cursor-pointer hover:text-slate-100 transition-all duration-200 ease-in-out"
+                                className="text-text/50  w-5 h-5 cursor-pointer hover:text-slate-100 transition-all duration-200 ease-in-out"
                                 onClick={async () => {
                                   // Get the value from clipboard (Mojtaba)
                                   const text =
@@ -563,7 +558,7 @@ export default function Home() {
                           placeholder={t.essayPlaceholder}
                           rows={10}
                           dir={dirtyFields.essay ? "ltr" : langInfo!.dir}
-                          className="w-full flex-1 resize-none rounded-lg bg-[#0F1117] border border-[#2A2D3A] p-2 text-base text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors font-(--font-geist-mono)"
+                          className="w-full flex-1 resize-none rounded-lg bg-[#0F1117] border border-foreground p-2 text-base text-slate-200 placeholder:text-text/6 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors font-(--font-geist-mono)"
                         />
                         {errors.essay && (
                           <p className="text-xs text-red-400">

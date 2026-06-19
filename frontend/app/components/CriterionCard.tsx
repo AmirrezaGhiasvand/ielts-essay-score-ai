@@ -36,7 +36,7 @@ export default function CriterionCard({
   const barWidth = `${(data.score / 9) * 100}%`;
 
   return (
-    <div className="bg-foreground rounded-xl border-2 border-border/30 p-4 space-y-3 hover:border-primary transition-color">
+    <div className="bg-foreground/70 rounded-xl border-2 border-border/40 p-4 space-y-3 hover:border-primary transition-color">
       {/* ---- Header ---- */}
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-semibold text-text uppercase tracking-wide flex-1 min-w-0 truncate">
@@ -58,7 +58,7 @@ export default function CriterionCard({
       </div>
 
       {/* ---- Feedback ---- */}
-      <div className="text-xs text-text/60 leading-relaxed prose prose-invert prose-xs max-w-none">
+      <div className="text-xs text-text/70 leading-relaxed prose prose-invert prose-xs max-w-none">
         <ReactMarkdown>{data.feedback}</ReactMarkdown>
       </div>
     </div>
