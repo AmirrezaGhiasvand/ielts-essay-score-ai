@@ -260,6 +260,7 @@ export default function Home() {
                         score={result.overall_band}
                         size={130}
                         label={t.overall}
+                        language={language}
                       />
                       <div className="flex-1 min-w-50 space-y-3 pt-2">
                         <div className="text-sm text-text leading-relaxed prose prose-invert prose-sm max-w-none">
@@ -277,7 +278,7 @@ export default function Home() {
                           </div>
                           <button
                             onClick={handleReset}
-                            className="flex items-center bg-foreground gap-1.5 text-xs text-text/80 hover:text-text border-2 border-border hover:border-border hover:bg-primary rounded-lg px-3 py-1.5 transition-colors"
+                            className="flex items-center bg-primary/30 gap-1.5 text-xs text-text/90 hover:text-text border-2 border-border hover:border-border hover:bg-primary rounded-lg px-3 py-1.5 transition-colors"
                           >
                             <RotateCcw size={11} />
                             {t.newEssay}
@@ -579,7 +580,7 @@ export default function Home() {
                         <button
                           type="submit"
                           disabled={loading || !wordCountOk}
-                          className="w-3/4 mx-auto bg-primary/20 border-2 border-border hover:border-primary hover:bg-primary rounded-lg py-1 text-base text-text font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                          className="w-3/4 mx-auto bg-primary/50 border-2 border-border hover:border-primary hover:bg-primary rounded-lg py-1 text-base text-text font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                         >
                           {loading ? (
                             <>

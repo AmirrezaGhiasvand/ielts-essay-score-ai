@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getBandLabels } from "@/app/lib/languages";
 
 interface BandGaugeProps {
   score: number;
   size?: number;
   label?: string;
+  language?: string;
 }
 
 function getBandColor(score: number): string {
@@ -16,16 +18,17 @@ function getBandColor(score: number): string {
   return                  "#C8102E";
 }
 
-function getBandLabel(score: number): string {
-  if (score >= 8.5) return "Expert";
-  if (score >= 7.5) return "Very Good";
-  if (score >= 6.5) return "Competent";
-  if (score >= 5.5) return "Modest";
-  if (score >= 4.5) return "Limited";
-  return                   "Very Limited";
+function getBandLabel(score: number, language: string): string {
+  const labels = getBandLabels(language);
+  if (score >= 8.5) return labels.expert;
+  if (score >= 7.5) return labels.veryGood;
+  if (score >= 6.5) return labels.competent;
+  if (score >= 5.5) return labels.modest;
+  if (score >= 4.5) return labels.limited;
+  return                   labels.veryLimited;
 }
 
-export default function BandGauge({ score, size = 160, label }: BandGaugeProps) {
+export default function BandGauge({ score, size = 160, label, language = "en" }: BandGaugeProps) {
   const [animatedScore, setAnimatedScore] = useState(0);
 
   useEffect(() => {
@@ -112,7 +115,7 @@ export default function BandGauge({ score, size = 160, label }: BandGaugeProps) 
           fill="#f2f1e7a0"
           fontFamily="var(--font-geist-sans), system-ui"
         >
-          {getBandLabel(score)}
+          {getBandLabel(score, language)}
         </text>
       </svg>
       {label && (

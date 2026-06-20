@@ -110,3 +110,25 @@ export type UILang = keyof typeof UI_TEXT;
 export function getUIText(lang: string) {
   return UI_TEXT[lang as UILang] ?? UI_TEXT.en;
 }
+export const BAND_LABELS = {
+  en: {
+    expert: "Expert",
+    veryGood: "Very Good",
+    competent: "Competent",
+    modest: "Modest",
+    limited: "Limited",
+    veryLimited: "Very Limited",
+  },
+  fa: {
+    expert: "ممتاز",
+    veryGood: "خیلی خوب",
+    competent: "خوب",
+    modest: "متوسط",
+    limited: "محدود",
+    veryLimited: "بسیار محدود",
+  },
+} as const;
+
+export function getBandLabels(lang: string) {
+  return BAND_LABELS[lang as keyof typeof BAND_LABELS] ?? BAND_LABELS.en;
+}
