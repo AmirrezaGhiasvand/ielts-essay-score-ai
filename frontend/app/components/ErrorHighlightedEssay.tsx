@@ -182,7 +182,9 @@ export default function ErrorHighlightedEssay({
             {span.errors.map((err, ei) => (
               <div
                 key={ei}
-                className={ei > 0 ? "mt-2 pt-2 border-t border-border" : ""}
+                className={
+                  ei > 0 ? "mt-2 pt-2 border-t border-border" : undefined
+                }
               >
                 <div className="flex items-center gap-1.5 mb-1">
                   <span
@@ -221,8 +223,8 @@ export default function ErrorHighlightedEssay({
   }
 
   return (
-    <p className="whitespace-pre-wrap leading-[2.4]" dir="ltr">
+    <div className="whitespace-pre-wrap leading-[2.4]" dir="ltr">
       {parts}
-    </p>
+    </div>
   );
 }

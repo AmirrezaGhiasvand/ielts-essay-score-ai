@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Send } from "lucide-react";
-import { ChatMessage, ScoringResponse } from "@/app/types";
+import { ChatMessage, LanguageOption, ScoringResponse } from "@/app/types";
 import { sendChatMessageStream } from "@/app/lib/api";
 import Markdown from "react-markdown";
 
@@ -10,23 +10,23 @@ interface ChatProps {
   essay: string;
   scoringResult: ScoringResponse;
   language: string;
+  langInfo: LanguageOption | undefined;
   placeholder: string;
   sendLabel: string;
   title: string;
   provider: string;
   model: string;
-  setChatActive: (value: boolean) => void;
 }
 export default function Chat({
   essay,
   scoringResult,
   language,
+  langInfo,
   placeholder,
   sendLabel,
   title,
   provider,
   model,
-  setChatActive,
 }: ChatProps) {
   const [history, setHistory] = useState<ChatMessage[]>([]);
   const [message, setMessage] = useState("");
@@ -123,9 +123,7 @@ export default function Chat({
       {/* ---- Messages ---- */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
         {history.length === 0 && (
-          <p className="text-md text-text/70 text-center mt-6">
-            Ask a question about your score or how to improve.
-          </p>
+          <p className="text-md text-text/70 text-center mt-6">{placeholder}</p>
         )}
         {history.map((msg, i) => {
           if (msg.role === "assistant" && msg.content === "" && loading)
@@ -144,7 +142,7 @@ export default function Chat({
               >
                 <div
                   className="prose prose-invert prose-sm max-w-none"
-                  dir="ltr"
+                  dir={langInfo!.dir}
                 >
                   <Markdown>{msg.content}</Markdown>
                 </div>
@@ -166,7 +164,10 @@ export default function Chat({
         <div ref={bottomRef} />
       </div>
       {/* ---- Input ---- */}
-      <div className="px-3 py-3 border-t-2 border-border flex gap-2">
+      <div
+        className="px-3 py-3 border-t-2 border-border flex gap-2"
+        dir={langInfo!.dir}
+      >
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}

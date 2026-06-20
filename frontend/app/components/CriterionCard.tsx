@@ -43,7 +43,7 @@ export default function CriterionCard({
           {title}
         </span>
         <span
-          className={`text-sm font-bold px-2 py-0.5 rounded-md border flex-shrink-0 ${scoreColorClass}`}
+          className={`text-sm font-bold px-2 py-0.5 rounded-md border shrink-0 ${scoreColorClass}`}
         >
           {data.score.toFixed(1)}
         </span>
