@@ -177,25 +177,23 @@ def hybrid_retrieve(
 
     return selected
 
-def get_llm(provider_override: str = None, model_override: str = None):
-    # use override if provided, otherwise fall back to env settings
+def get_llm(provider_override: str = None, model_override: str = None, api_key_override: str = None):
     active_provider = provider_override or PROVIDER
-    
+
+
     if active_provider == "openrouter":
-        print("Using OpenRouter cloud provider...")
+        # use the user's own API key if provided, otherwise fall back to server default
+        key_to_use = api_key_override or OPENROUTER_API_KEY
+        if api_key_override:
+            print("Using OpenRouter cloud provider (user-provided API key)...")
+        else:
+            print("Using OpenRouter cloud provider...")
         return ChatOpenAI(
-            api_key=OPENROUTER_API_KEY,
+            api_key=key_to_use,
             base_url="https://openrouter.ai/api/v1",
             model=model_override or OPENROUTER_MODEL,
             temperature=0.2,
         )
-    print("Using local Ollama provider...")
-    return ChatOllama(
-        model=model_override or OLLAMA_MODEL,
-        base_url=OLLAMA_BASE_URL,
-        temperature=0.2,
-        keep_alive="5m",
-    )
 
 
 # -------- Official IELTS rounding --------
@@ -357,9 +355,9 @@ Respond in this exact JSON format:
 
 # -------- Detect text errors --------
 
-def detect_text_errors(essay: str) -> list[dict]:
+def detect_text_errors(essay: str, provider: str = None, model: str = None, api_key: str = None) -> list[dict]:
     print("Detecting text errors...")
-    llm   = get_llm()
+    llm   = get_llm(provider_override=provider, model_override=model, api_key_override=api_key)
     chain = ERROR_DETECTION_PROMPT | llm | StrOutputParser()
 
     try:
@@ -397,6 +395,7 @@ def score_essay(
     language:  str = "en",
     provider:  str = None,
     model:     str = None,
+    api_key:   str = None,
 ) -> ScoringResponse:
 
     # ---- Start timer ----
@@ -437,7 +436,7 @@ def score_essay(
     model_name      = model or (OPENROUTER_MODEL if active_provider == "openrouter" else OLLAMA_MODEL)
     print(f"Scoring essay with {model_name}...")
 
-    llm   = get_llm(provider_override=provider, model_override=model)
+    llm   = get_llm(provider_override=provider, model_override=model, api_key_override=api_key)
     chain = SCORING_PROMPT | llm | StrOutputParser()
     raw   = chain.invoke({
         "task_type": task_type,
@@ -482,7 +481,7 @@ def score_essay(
     ]
 
         # ---- Detect text errors (separate LLM call) ----
-    text_errors = detect_text_errors(essay)
+    text_errors = detect_text_errors(essay, provider=provider, model=model, api_key=api_key)
 
     # ---- Final latency including error detection ----
     latency_ms = int((time.time() - start_time) * 1000)
@@ -539,10 +538,11 @@ def chat_about_essay(
     language:       str = "en",
     provider:       str = None,
     model:          str = None,
+    api_key:        str = None,
 ) -> str:
 
     language_name = LANGUAGE_MAP.get(language, "English")
-    llm = get_llm(provider_override=provider, model_override=model)
+    llm = get_llm(provider_override=provider, model_override=model, api_key_override=api_key)
 
     # ---- Build messages with history ----
     # model has no memory — pass full history every time
@@ -585,9 +585,10 @@ def chat_about_essay_stream(
     language:       str = "en",
     provider:       str = None,
     model:          str = None,
+    api_key:        str = None,
 ):
     language_name = LANGUAGE_MAP.get(language, "English")
-    llm            = get_llm(provider_override=provider, model_override=model)
+    llm            = get_llm(provider_override=provider, model_override=model, api_key_override=api_key)
 
     messages = CHAT_PROMPT.format_messages(
         language=language_name,

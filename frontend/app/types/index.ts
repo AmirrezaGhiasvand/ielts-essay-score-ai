@@ -7,6 +7,7 @@ export interface ScoringRequest {
   language: string;
   provider: string;
   model: string;
+  api_key: string;
 }
 
 export interface ChatRequest {
@@ -17,6 +18,7 @@ export interface ChatRequest {
   language: string;
   provider: string;
   model: string;
+  api_key: string;
 }
 
 export interface TextError {

@@ -50,6 +50,7 @@ class ScoringRequest(BaseModel):
     # optional model override from frontend
     provider:  str  = Field(default="")
     model:     str  = Field(default="")
+    api_key:   str  = Field(default="", description="User-provided OpenRouter API key override")
 
 
 # -------- Response --------
@@ -65,6 +66,7 @@ class ScoringResponse(BaseModel):
     # None if RAG finds no similar essays
     similar_essays: Optional[list[SimilarEssay]] = None
     text_errors:    list[TextError] = []
+    
 
 
 # -------- Follow-up chat --------
@@ -83,6 +85,7 @@ class ChatRequest(BaseModel):
     language:       str = Field(default="en")
     provider:       str = Field(default="")
     model:          str = Field(default="")
-
+    api_key:        str = Field(default="", description="User-provided OpenRouter API key override")
+    
 class ChatResponse(BaseModel):
     reply: str

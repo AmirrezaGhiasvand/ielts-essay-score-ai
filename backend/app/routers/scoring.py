@@ -30,6 +30,7 @@ async def score(request: ScoringRequest):
             language=request.language,
             provider=request.provider or None,
             model=request.model or None,
+            api_key=request.api_key or None,
         )
         return result
 
@@ -54,6 +55,7 @@ async def chat(request: ChatRequest):
             language=request.language,
             provider=request.provider or None,
             model=request.model or None,
+            api_key=request.api_key or None,
         )
         return ChatResponse(reply=reply)
 
@@ -112,6 +114,7 @@ async def chat_stream(request: ChatRequest):
                 language=request.language,
                 provider=request.provider or None,
                 model=request.model or None,
+                api_key=request.api_key or None,
             ):
                 yield chunk
         except Exception as e:
