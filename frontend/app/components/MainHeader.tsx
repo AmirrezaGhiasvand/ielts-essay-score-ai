@@ -1,36 +1,29 @@
+"use client";
 import { FaGithub } from "react-icons/fa";
-import ModelSelector from "./components/ModelSelector";
+import ModelSelector from "./ModelSelector";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDown } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
-import { Language, LanguageOption } from "./types";
+import { Dispatch, SetStateAction, useState } from "react";
+import { LANGUAGES } from "@/app/lib/languages";
+import { useLanguageContext } from "../contexts/LangaugeContext";
 
-type MainHeaderType = {
-  title: string;
-  subtitle: string;
-  langOpen: boolean;
-  language: Language;
-  LANGUAGES: LanguageOption[];
-  setLangOpen: Dispatch<SetStateAction<boolean>>;
-  setLanguage: Dispatch<SetStateAction<Language>>;
-  handleModelChange: (provider: string, modelId: string) => void;
-};
+const MainHeader = () => {
+  const { language, setLanguage, setSelectedModel, setSelectedProvider, t } =
+    useLanguageContext();
 
-const MainHeader = ({
-  title,
-  subtitle,
-  language,
-  langOpen,
-  handleModelChange,
-  setLangOpen,
-  setLanguage,
-  LANGUAGES,
-}: MainHeaderType) => {
+  const [langOpen, setLangOpen] = useState(false);
+
+  // --------- Change --------
+  function handleModelChange(provider: string, modelId: string) {
+    setSelectedProvider(provider);
+    setSelectedModel(modelId);
+  }
+
   return (
     <header className="border-b-2 border-border bg-background px-3 py-2 flex items-center justify-between sticky top-0 z-20 backdrop-blur-sm">
       <div className="flex items-center gap-3">
         <a
-          className="w-9 h-9 bg-primary hover:bg-primary/70 rounded flex items-center justify-center shrink-0 transition-colors duration-150"
+          className="w-9 h-9 bg-primary hover:bg-primary/70 rounded flex items-center justify-center shrink-0 transition-colors duration-150 text-text"
           href="https://github.com/AmirrezaGhiasvand/ielts-essay-score-ai"
           target="_blank"
           rel="noopener noreferrer"
@@ -38,8 +31,8 @@ const MainHeader = ({
           <FaGithub className="w-6 h-6 cursor-pointer" />
         </a>
         <div>
-          <h1 className="text-md font-semibold text-slate-100">{title}</h1>
-          <p className="text-[11px] text-text">{subtitle}</p>
+          <h1 className="text-md font-semibold text-slate-100">{t.title}</h1>
+          <p className="text-[11px] text-text">{t.subtitle}</p>
         </div>
       </div>
 
@@ -71,7 +64,7 @@ const MainHeader = ({
                     language === lang.code
                       ? "text-text bg-primary/60 font-semibold"
                       : "text-text/80 hover:text-text hover:bg-primary/60"
-                  }`}
+                  } ${lang.code === "fa" && "font-persian font-semibold"}`}
                 >
                   {lang.label}
                 </button>

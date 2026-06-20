@@ -38,6 +38,10 @@ html {
   font-size: 15px;
 }
 
+.font-persian {
+  font-family: "Noto Sans Arabic", sans-serif;
+}
+
 /* ---- Scrollbar ---- */
 ::-webkit-scrollbar {
   width: 4px;

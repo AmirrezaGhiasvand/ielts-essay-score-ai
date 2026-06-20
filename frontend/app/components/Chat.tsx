@@ -15,7 +15,6 @@ interface ChatProps {
   title: string;
   provider: string;
   model: string;
-  setChatActive: (value: boolean) => void;
 }
 export default function Chat({
   essay,
@@ -26,7 +25,6 @@ export default function Chat({
   title,
   provider,
   model,
-  setChatActive,
 }: ChatProps) {
   const [history, setHistory] = useState<ChatMessage[]>([]);
   const [message, setMessage] = useState("");
