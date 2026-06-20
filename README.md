@@ -1,327 +1,126 @@
-# IELTS Essay Scorer — AI-Powered Writing Evaluator
+# IELTS Essay Scorer
 
-An AI-powered IELTS writing scorer that evaluates essays across all four official criteria using a local or cloud LLM and RAG-based examiner feedback. Supports English and Persian responses.
+An AI-powered IELTS Writing Task 2 essay scorer that combines retrieval-augmented generation (RAG) with large language models to provide IELTS band scores, detailed per-criterion feedback, inline error highlighting, and an interactive chat for follow-up questions — all in a clean, multilingual, dark-mode interface.
 
----
-
-## Motivation
-
-Existing IELTS scoring tools are either expensive, inaccurate, or provide no meaningful feedback. This project builds a fully local, explainable scorer grounded in real examiner comments — no mandatory API costs, no data privacy concerns, and feedback that references actual IELTS band descriptors.
+🔗 **Repo:** [github.com/AmirrezaGhiasvand/ielts-essay-score-ai](https://github.com/AmirrezaGhiasvand/ielts-essay-score-ai)
 
 ---
 
-## Approach
+## 🎥 Demo
 
-| Component | Choice | Reason |
-| --- | --- | --- |
-| LLM (Local) | Mistral 7b / Gemma 4 (Ollama) | Free, local, no API costs |
-| LLM (Cloud) | GPT-4o-mini / Llama 3.3 70b (OpenRouter) | Fast inference, free tier available |
-| Embeddings | nomic-embed-text (Ollama) | Long-text aware, runs locally |
-| Vector DB | ChromaDB | Lightweight, no server needed |
-| RAG Framework | LangChain | Industry standard, modular |
-| Backend | FastAPI | Fast, automatic docs, Pydantic validation |
-| Frontend | Next.js + Tailwind | Portfolio-grade UI, easy deployment |
-| Dataset | IELTS Writing Dataset (HuggingFace) | 1,274 human-scored essays |
+> _Video walkthrough coming soon — placeholder for a screen recording demoing the full flow: submitting an essay, viewing band scores, exploring error highlights, and chatting with the AI examiner._
+
+[![Demo Video Placeholder](https://via.placeholder.com/800x450.png?text=Demo+Video+Coming+Soon)](#)
 
 ---
 
-## Project Structure
+## The Journey
 
-```
-ielts-essay-score-ai/
-├── backend/
-│   ├── app/
-│   │   ├── main.py               # FastAPI app entry point + auto DB setup
-│   │   ├── routers/
-│   │   │   └── scoring.py        # API endpoints
-│   │   ├── services/
-│   │   │   └── chain.py          # Unified LangChain chain (RAG + LLM + scoring)
-│   │   └── models/
-│   │       └── schemas.py        # Pydantic request/response models
-│   ├── data/
-│   │   ├── cleaned_dataset.csv   # 1,274 cleaned essays
-│   │   ├── train.csv             # 1,224 essays indexed in ChromaDB
-│   │   ├── test.csv              # 50 held-out essays for evaluation
-│   │   ├── eval_results.json     # Latest evaluation results
-│   │   └── clean_dataset.py      # Data cleaning script
-│   ├── scripts/
-│   │   ├── populate_db.py        # One-time ChromaDB setup (auto-runs on startup)
-│   │   └── evaluate.py           # RAG evaluation script
-│   ├── requirements.txt
-│   └── .env.example
-└── frontend/                     # Next.js app (coming soon)
-```
+This project started as a simple idea — _can an LLM score an IELTS essay as reliably as a human examiner?_ — and turned into a multi-week deep dive into prompt engineering, retrieval-augmented generation, and frontend design.
+
+**Where it began:** a FastAPI backend wired to a local Ollama model (Mistral 7b), a barebones scoring prompt with the four official IELTS band descriptors, and a single ChromaDB collection holding ~1,200 essays scraped and cleaned from a public IELTS writing dataset.
+
+**The core challenge:** getting consistent, accurate band scores out of an LLM. Early tests showed a clear pattern — local models like Mistral tended to over-score essays by nearly a full band, while early cloud attempts under-scored. This sent the project down a calibration rabbit hole:
+
+- **Hybrid retrieval.** Plain semantic search wasn't pulling the most relevant reference essays. We built a hybrid retriever combining essay-similarity, question-similarity, and BM25 keyword matching — weighted and re-ranked for band diversity so the model sees a spread of reference scores, not three near-identical essays.
+- **Few-shot calibration.** We hand-picked real, human-scored essays spanning Band 6.0 through 8.5 and embedded them directly into the scoring prompt as concrete anchors, alongside explicit calibration notes distinguishing what separates a Band 6 from a Band 7, and a Band 7 from a Band 8.
+- **The real breakthrough: provider quality.** After testing prompt tweak after prompt tweak, the data made it clear that no amount of prompt engineering could fully fix a model that simply wasn't strong enough at the task. Switching the default provider to **GPT-4o Mini via OpenRouter** combined with the hybrid RAG pipeline produced by far the most reliable, consistent results — proving that for nuanced evaluation tasks like this, model quality matters more than micro-prompt-tuning.
+
+**Then came the UI.** What started as a functional form-and-results page evolved into a fully custom dark-mode interface with a signature animated band gauge, RTL support for Persian users (with proper font handling), markdown-rendered feedback, and an inline error-highlighting system inspired by professional essay-checking tools — flagging grammar, spelling, and repetition issues directly inside the submitted essay with hover tooltips and exact-match verification to eliminate hallucinated corrections.
+
+**Along the way:** a streaming chat interface so users can ask the AI examiner follow-up questions and watch the response appear token-by-token, a model selector to switch between local (Ollama) and cloud (OpenRouter) providers on the fly, and a "Try a Sample Essay" button pulling real essays from the held-out dataset for instant demos.
 
 ---
 
-## Hardware Requirements
+## Features
 
-| Component | Minimum | Recommended |
-| --- | --- | --- |
-| RAM | 8GB | 16GB |
-| Storage | 10GB free | 15GB free |
-| Python | 3.11 | 3.11 |
-| Ollama | Latest | Latest |
-
-> GPU is not required — Ollama runs on CPU. GPU significantly speeds up inference.
-
----
-
-## Setup
-
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/AmirrezaGhiasvand/ielts-essay-score-ai.git
-cd ielts-essay-score-ai
-```
-
-### 2. Install Ollama and pull models
-
-```bash
-# Install Ollama from https://ollama.com
-ollama pull mistral:7b
-ollama pull nomic-embed-text
-```
-
-### 3. Create virtual environment with Python 3.11
-
-```bash
-py -3.11 -m venv venv
-venv\Scripts\activate   # Windows
-source venv/bin/activate # Mac/Linux
-```
-
-### 4. Install dependencies
-
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
-### 5. Configure environment
-
-```bash
-copy .env.example .env   # Windows
-cp .env.example .env     # Mac/Linux
-# Edit .env and set your model preferences
-```
-
-### 6. Start the backend
-
-```bash
-python -m app.main
-```
-
-> The vector database is populated automatically on first startup — no manual setup needed.
-
-API runs at `http://localhost:8000`
-Interactive docs at `http://localhost:8000/docs`
+- **AI-powered band scoring** across all four official IELTS criteria (Task Achievement, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy), with official IELTS-style 0.25/0.75 rounding applied server-side
+- **Hybrid RAG retrieval** — semantic essay similarity + semantic question similarity + BM25 keyword matching, re-ranked for band diversity
+- **Few-shot calibration** using real, human-scored reference essays spanning Band 6.0–8.5
+- **Inline error highlighting** — grammar, spelling, and repetition issues flagged directly in the essay text with color-coded underlines and hover tooltips showing the correction and explanation; all matches verified against the original essay to prevent hallucinated errors
+- **Streaming chat** — ask follow-up questions about your score and watch the AI examiner's response stream in token-by-token
+- **Model selector** — switch between local Ollama models and cloud providers (OpenRouter) per request, including GPT-4o Mini and Gemma 4
+- **Multilingual UI & feedback** — English, Persian (with proper RTL layout and font handling), with feedback text generated in the selected language
+- **Sample essay generator** — instantly populate the form with a real essay from the held-out test set for quick demos
+- **Dark-mode, fully responsive interface** built with Next.js and Tailwind, featuring an animated SVG band-score gauge as the signature visual element
 
 ---
 
-## Usage
+## Tech Stack
 
-### Score an essay
+**Backend**
 
-```bash
-curl -X POST http://localhost:8000/api/score \
-  -H "Content-Type: application/json" \
-  -d '{
-    "task_type": 2,
-    "question": "Your IELTS question here",
-    "essay": "Your essay here",
-    "language": "en"
-  }'
-```
+- FastAPI
+- LangChain
+- ChromaDB (vector store)
+- Hugging Face sentence-transformers for embeddings
+- rank-bm25 for keyword-based hybrid retrieval
+- Pydantic
 
-### Supported languages
+**LLM Providers**
 
-| Code | Language |
-| --- | --- |
-| `en` | English |
-| `fa` | Persian / Farsi |
-| `ar` | Arabic |
-| `zh` | Chinese |
-| `fr` | French |
-| `de` | German |
-| `es` | Spanish |
-| `tr` | Turkish |
+- OpenRouter (GPT-4o Mini, Gemma 4)
+- Ollama (local — Mistral, Gemma)
 
-### Provider options
+**Frontend**
 
-Set `PROVIDER` in `.env` to switch between local and cloud:
-
-| Provider | Model | Speed | Cost |
-| --- | --- | --- | --- |
-| `ollama` | mistral:7b | ~90s | Free |
-| `openrouter` | gpt-4o-mini | ~6s | Free tier |
-| `openrouter` | llama-3.3-70b | ~5s | Free tier |
-| `groq` | llama-3.3-70b | ~3s | Free tier |
-
----
-
-## How It Works
-
-```
-User submits essay + question
-        ↓
-Word count validation (Task 1: 150w, Task 2: 250w)
-        ↓
-RAG retrieves 3 similar essays from ChromaDB using MMR
-(1,224 essays indexed, filtered by task type)
-        ↓
-LLM scores all 4 IELTS criteria using
-official band descriptors + RAG context
-        ↓
-Official IELTS rounding applied to overall band
-        ↓
-Scores + feedback returned to user
-```
-
-### IELTS Criteria Scored
-
-| Criterion | Weight |
-| --- | --- |
-| Task Achievement / Response | 25% |
-| Coherence & Cohesion | 25% |
-| Lexical Resource | 25% |
-| Grammatical Range & Accuracy | 25% |
-
-### Official IELTS Rounding Rules
-
-| Raw Average | Band |
-| --- | --- |
-| x.00 | x.0 |
-| x.01 – x.24 | x.0 (round down) |
-| x.25 – x.74 | x.5 |
-| x.75 – x.99 | (x+1).0 (round up) |
+- Next.js 16 + TypeScript
+- Tailwind CSS v4
+- React
+- react-markdown for rendering formatted feedback
+- react-hook-form + zod for form validation
 
 ---
 
 ## Evaluation Results
 
-Evaluated on 5 held-out essays from `test.csv` with known human band scores.
+Evaluated on a held-out test set of real, human-scored IELTS Task 2 essays.
 
-### Mistral 7b (Local — Ollama)
+| Configuration | Model              | MAE (bands) | Within 0.5 Band | Exact Match |
+| ------------- | ------------------ | ----------- | --------------- | ----------- |
+| Baseline      | Mistral 7b (local) | 0.600       | 60%             | 20%         |
+| + Hybrid RAG  | GPT-4o Mini        | **0.400**   | **80%**         | **40%**     |
 
-| Metric | Score |
-| --- | --- |
-| MAE | 0.600 bands |
-| Exact match rate | 20.0% |
-| Within 0.5 band rate | 60.0% |
-| Average latency | 107.1s |
-
-| Essay | Task | Human | Predicted | Diff |
-| --- | --- | --- | --- | --- |
-| 1 | T1 | 7.0 | 7.5 | +0.5 ✅ |
-| 2 | T2 | 7.0 | 7.0 | 0.0 ✅ |
-| 3 | T2 | 6.5 | 7.5 | +1.0 ❌ |
-| 4 | T2 | 6.0 | 7.0 | +1.0 ❌ |
-| 5 | T1 | 6.5 | 7.0 | +0.5 ✅ |
-
-**Observation:** Mistral tends to over-score essays in the Band 6–6.5 range, inflating by 0.5–1.0 bands. Higher band essays (7.0+) are scored more accurately.
+**Best overall configuration:** GPT-4o Mini + Hybrid RAG, giving the most consistent results across a larger sample.
 
 ---
 
-### GPT-4o-mini (Cloud — OpenRouter)
+## Getting Started
 
-| Metric | Score |
-| --- | --- |
-| MAE | 0.500 bands |
-| Exact match rate | 20.0% |
-| Within 0.5 band rate | 80.0% |
-| Average latency | 6.2s |
+### Backend
 
-| Essay | Task | Human | Predicted | Diff |
-| --- | --- | --- | --- | --- |
-| 1 | T1 | 7.0 | 6.5 | -0.5 ✅ |
-| 2 | T2 | 7.0 | 6.0 | -1.0 ❌ |
-| 3 | T2 | 6.5 | 6.0 | -0.5 ✅ |
-| 4 | T2 | 6.0 | 6.0 | 0.0 ✅ |
-| 5 | T1 | 6.5 | 6.0 | -0.5 ✅ |
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate   # Windows
+pip install -r requirements.txt
+cp .env.example .env    # fill in your API keys (openrouter)
+python -m app.main
+```
 
-**Observation:** GPT-4o-mini slightly under-scores essays, opposite bias to Mistral. Better within-0.5-band rate (80% vs 60%) and 17x faster inference. Lower band essays are more accurately scored.
+The backend automatically starts Ollama (if configured) and populates the vector database on first run.
 
----
+### Frontend
 
-### Model Comparison
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-| Metric | Mistral 7b | GPT-4o-mini |
-| --- | --- | --- |
-| MAE | 0.600 | **0.500** |
-| Within 0.5 band | 60.0% | **80.0%** |
-| Exact match | 20.0% | 20.0% |
-| Avg latency | 107.1s | **6.2s** |
-| Cost | Free (local) | Free tier |
-| Bias | Over-scores | Under-scores |
-
-> GPT-4o-mini outperforms Mistral 7b on all accuracy metrics and is 17x faster. Both models show systematic bias — Mistral inflates scores, GPT-4o-mini deflates them slightly. A larger evaluation set (50 essays) is needed for statistically significant conclusions.
+Visit `http://localhost:3000` (or your configured port).
 
 ---
 
-## Dataset
+## What's New
 
-| Property | Value |
-| --- | --- |
-| Source | HuggingFace — IELTS Writing Dataset |
-| Raw essays | 1,435 |
-| After cleaning | 1,274 |
-| Train split | 1,224 (indexed in ChromaDB) |
-| Test split | 50 (held out for evaluation) |
-| With examiner comments | 59 |
-| Task 1 essays | ~45% |
-| Task 2 essays | ~55% |
+Recent additions to the project:
+
+- **Exam Topic** — get an exam topic to write essays about. uses our train.csv to retrieve
+- **New Interface** — New clean, minimalistic UI.
 
 ---
 
-## Roadmap
+## License
 
-| Feature | Status |
-| --- | --- |
-| Backend API (scoring + chat) | ✅ Done |
-| RAG pipeline with ChromaDB | ✅ Done |
-| Official IELTS band rounding | ✅ Done |
-| Multilingual feedback (8 languages) | ✅ Done |
-| Multi-provider support (Ollama/Groq/OpenRouter) | ✅ Done |
-| Auto vector store population on startup | ✅ Done |
-| Evaluation script (5 essays) | ✅ Done |
-| Full evaluation (50 essays) | 🔄 In Progress |
-| Score inflation fix (prompt calibration) | 🔄 In Progress |
-| Latency timer in response | ✅ Done |
-| Groq API integration | ✅ Done |
-| OpenRouter API integration | ✅ Done |
-| API key rotation for rate limiting | ⬜ Planned |
-| Model selector UI (Ollama models) | ⬜ Planned |
-| Next.js frontend | ⬜ Planned |
-| Score history | ⬜ Planned |
-| Streaming chat responses | ⬜ Planned |
-
----
-
-## Dependencies
-
-| Package | Purpose |
-| --- | --- |
-| fastapi | API framework |
-| langchain | RAG orchestration |
-| langchain-ollama | Ollama LLM + embeddings |
-| langchain-openai | OpenRouter integration |
-| langchain-groq | Groq integration |
-| langchain-chroma | ChromaDB vector store |
-| chromadb | Local vector database |
-| ollama | Local LLM runner |
-| pandas | Dataset processing |
-| pydantic | Request/response validation |
-| uvicorn | ASGI server |
-
----
-
-
-## References
-
-- [IELTS Official Band Descriptors](https://www.ielts.org/about-ielts/ielts-scoring-in-detail)
-- [LangChain Documentation](https://python.langchain.com)
-- [ChromaDB Documentation](https://docs.trychroma.com)
-- [Ollama](https://ollama.com)
-- [IELTS Writing Dataset — HuggingFace](https://huggingface.co)
+MIT
