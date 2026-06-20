@@ -98,7 +98,6 @@ cp .env.example .env    # fill in your API keys (openrouter)
 python -m app.main
 ```
 
-The backend automatically starts Ollama (if configured) and populates the vector database on first run.
 
 ### Frontend
 
