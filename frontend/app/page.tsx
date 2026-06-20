@@ -580,7 +580,7 @@ export default function Home() {
                         <button
                           type="submit"
                           disabled={loading || !wordCountOk}
-                          className="w-3/4 mx-auto bg-primary/50 border-2 border-border hover:border-primary hover:bg-primary rounded-lg py-1 text-base text-text font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                          className="w-3/4 mx-auto bg-primary/60 border-2 border-border hover:border-primary hover:bg-primary rounded-lg py-1 text-base text-text font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                         >
                           {loading ? (
                             <>
@@ -594,7 +594,7 @@ export default function Home() {
                         <button
                           type="button"
                           disabled={!isDirty}
-                          className="w-1/4 mx-auto bg-primary/20 border-2 border-border hover:border-primary hover:bg-primary rounded-lg py-1 text-base text-text font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                          className="w-1/4 mx-auto bg-primary/10 border-2 border-border hover:border-primary hover:bg-primary rounded-lg py-1 text-base text-text font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                           onClick={() => reset()}
                         >
                           {t.clear}

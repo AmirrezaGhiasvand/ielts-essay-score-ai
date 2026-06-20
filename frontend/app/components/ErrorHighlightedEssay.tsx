@@ -39,6 +39,20 @@ interface RawMatch {
   error: TextError;
 }
 
+// -------- Check if a match is a whole word/phrase boundary --------
+// prevents "news" from matching inside "newspaper"
+
+function isWordBoundary(essay: string, start: number, end: number): boolean {
+  const before = start > 0 ? essay[start - 1] : " ";
+  const after = end < essay.length ? essay[end] : " ";
+  const wordCharRegex = /[a-zA-Z0-9'-]/;
+
+  const beforeOk = !wordCharRegex.test(before);
+  const afterOk = !wordCharRegex.test(after);
+
+  return beforeOk && afterOk;
+}
+
 function buildSpans(essay: string, errors: TextError[]): Span[] {
   const matches: RawMatch[] = [];
 
@@ -48,7 +62,12 @@ function buildSpans(essay: string, errors: TextError[]): Span[] {
     while (true) {
       const idx = essay.indexOf(error.original, searchFrom);
       if (idx === -1) break;
-      matches.push({ start: idx, end: idx + error.original.length, error });
+
+      const end = idx + error.original.length;
+      // only accept matches that are at actual word boundaries
+      if (isWordBoundary(essay, idx, end)) {
+        matches.push({ start: idx, end, error });
+      }
       searchFrom = idx + error.original.length;
     }
   }
@@ -104,8 +123,15 @@ export default function ErrorHighlightedEssay({
   essay,
   errors,
 }: ErrorHighlightedEssayProps) {
-  const [activeSpan, setActiveSpan] = useState<number | null>(null);
+  const [hoveredSpanIndex, setHoveredSpanIndex] = useState<number | null>(null);
   const spans = buildSpans(essay, errors);
+  console.log(
+    "DEBUG spans:",
+    spans.map((s) => ({
+      text: essay.slice(s.start, s.end),
+      types: s.errors.map((e) => e.error_type),
+    })),
+  );
 
   if (spans.length === 0) {
     return <p className="whitespace-pre-wrap leading-relaxed">{essay}</p>;
@@ -122,22 +148,27 @@ export default function ErrorHighlightedEssay({
     const uniqueTypes = Array.from(
       new Set(span.errors.map((e) => e.error_type)),
     );
-    const isActive = activeSpan === i;
+    // determine if this segment shares any error with the currently hovered segment
+    const hoveredSpan =
+      hoveredSpanIndex !== null ? spans[hoveredSpanIndex] : null;
+    const isActive =
+      hoveredSpan !== null &&
+      span.errors.some((e) => hoveredSpan.errors.includes(e));
     const bgColor = ERROR_BG[uniqueTypes[0]] ?? "bg-slate-400/10";
 
     parts.push(
       <span
         key={i}
         className={`relative inline-block cursor-pointer rounded-sm transition-colors duration-150 ${isActive ? bgColor : ""}`}
-        onMouseEnter={() => setActiveSpan(i)}
-        onMouseLeave={() => setActiveSpan(null)}
+        onMouseEnter={() => setHoveredSpanIndex(i)}
+        onMouseLeave={() => setHoveredSpanIndex(null)}
       >
         <span className="relative">
           {essay.slice(span.start, span.end)}
           {uniqueTypes.map((type, idx) => (
             <span
               key={type}
-              className="absolute left-0 right-0 h-[2px] rounded-full"
+              className="absolute left-0 right-0 h-[2px] rounded-full pointer-events-none"
               style={{
                 backgroundColor: UNDERLINE_COLORS[type] ?? "#94A3B8",
                 bottom: `${-4 - idx * 4}px`,
@@ -146,8 +177,8 @@ export default function ErrorHighlightedEssay({
           ))}
         </span>
 
-        {activeSpan === i && (
-          <span className="absolute bottom-full left-0 mb-3 w-72 bg-foreground border border-border rounded-lg p-3 shadow-2xl z-50 text-xs normal-case ">
+        {hoveredSpanIndex === i && (
+          <span className="absolute bottom-full mb-3 w-72 max-w-[90vw] bg-foreground border border-border rounded-lg p-3 shadow-2xl z-50 text-xs normal-case left-1/2 -translate-x-1/2">
             {span.errors.map((err, ei) => (
               <div
                 key={ei}
