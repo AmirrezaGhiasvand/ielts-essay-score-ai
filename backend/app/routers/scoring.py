@@ -84,11 +84,9 @@ async def get_models():
     except Exception as e:
         print(f"Ollama connection error: {e}")
 
-    cloud_models = []
-    if os.getenv("OPENROUTER_API_KEY"):
-        cloud_models += [
-            {"id": "openai/gpt-4o-mini", "name": "GPT-4o Mini", "provider": "openrouter"},
-        ]
+    cloud_models = [
+        {"id": "openai/gpt-4o-mini", "name": "GPT-4o Mini", "provider": "openrouter"},
+    ]
    
 
     return {
