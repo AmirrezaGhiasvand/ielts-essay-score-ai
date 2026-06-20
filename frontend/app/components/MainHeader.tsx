@@ -7,7 +7,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { LANGUAGES } from "@/app/lib/languages";
 import { useLanguageContext } from "../contexts/LangaugeContext";
 
-const MainHeader = () => {
+const MainHeader = ({ apiKey }: { apiKey: string }) => {
   const { language, setLanguage, setSelectedModel, setSelectedProvider, t } =
     useLanguageContext();
 
@@ -38,7 +38,10 @@ const MainHeader = () => {
 
       {/* ---- Controls ---- */}
       <div className="flex items-center gap-4">
-        <ModelSelector onModelChange={handleModelChange} />
+        <ModelSelector
+          onModelChange={handleModelChange}
+          hasApiKey={apiKey?.length > 0}
+        />
         <Menu>
           <MenuButton
             onClick={() => setLangOpen(!langOpen)}

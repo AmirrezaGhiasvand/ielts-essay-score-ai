@@ -7,9 +7,13 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
 interface ModelSelectorProps {
   onModelChange: (provider: string, modelId: string) => void;
+  hasApiKey?: boolean;
 }
 
-export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
+export default function ModelSelector({
+  onModelChange,
+  hasApiKey = false,
+}: ModelSelectorProps) {
   const [models, setModels] = useState<ModelsResponse | null>(null);
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<ModelOption | null>(null);
@@ -17,26 +21,29 @@ export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
 
   // ---- Fetch models on mount ----
   useEffect(() => {
-    async function fetchModels() {
-      try {
-        const data = await getModels();
-        setModels(data);
+    if (hasApiKey) {
+      async function fetchModels() {
+        try {
+          const data = await getModels();
+          setModels(data);
 
-        // set current model as selected
-        const allModels = [...data.ollama_models, ...data.cloud_models];
-        const current = allModels.find(
-          (m) =>
-            m.id === data.current_model && m.provider === data.current_provider,
-        );
-        if (current) setSelected(current);
-      } catch {
-        console.error("Failed to fetch models");
-      } finally {
-        setLoading(false);
+          // set current model as selected
+          const allModels = [...data.ollama_models, ...data.cloud_models];
+          const current = allModels.find(
+            (m) =>
+              m.id === data.current_model &&
+              m.provider === data.current_provider,
+          );
+          if (current) setSelected(current);
+        } catch {
+          console.error("Failed to fetch models");
+        } finally {
+          setLoading(false);
+        }
       }
+      fetchModels();
     }
-    fetchModels();
-  }, []);
+  }, [hasApiKey]);
 
   function handleSelect(model: ModelOption) {
     setSelected(model);

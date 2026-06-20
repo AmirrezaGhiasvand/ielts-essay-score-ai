@@ -23,7 +23,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [submittedEssay, setSubmittedEssay] = useState("");
   const [mounted, setMounted] = useState(false);
-  const [openrouterKey, setOpenrouterKey] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState<string | null>(null);
 
   const methods = useForm<EssayFormData>({
     resolver: zodResolver(formSchema),
@@ -36,7 +36,7 @@ export default function Home() {
 
   useEffect(() => {
     setMounted(true);
-    setOpenrouterKey(localStorage.getItem("openrouter_key"));
+    setApiKey(localStorage.getItem("openrouter_key"));
   }, []);
 
   if (!mounted) {
@@ -58,6 +58,7 @@ export default function Home() {
         language,
         provider: selectedProvider,
         model: selectedModel,
+        api_key: apiKey as string,
       });
       setResult(response);
     } catch (err: unknown) {
@@ -81,10 +82,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background" dir={langInfo!.dir}>
       {/* ---- Header ---- */}
-      <MainHeader />
+      <MainHeader apiKey={apiKey as string} />
       {/* ---- Main ---- */}
       <main className="w-full px-3 py-2">
-        {openrouterKey ? (
+        {apiKey ? (
           loading ? (
             <div className="min-h-[calc(100vh-75px)] flex justify-center items-center text-text">
               <TextType
@@ -148,7 +149,7 @@ export default function Home() {
             <ApiKeyInput
               onSave={(key: string) => {
                 console.log("API Key:", key);
-                setOpenrouterKey(key);
+                setApiKey(key);
               }}
             />
           </div>
