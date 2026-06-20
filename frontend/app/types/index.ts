@@ -61,7 +61,7 @@ export interface ChatResponse {
 
 // -------- UI types --------
 
-export type Language = "en" | "fa" | "ar" | "zh" | "fr" | "de" | "es" | "tr";
+export type Language = "en" | "fa";
 
 export interface LanguageOption {
   code: Language;

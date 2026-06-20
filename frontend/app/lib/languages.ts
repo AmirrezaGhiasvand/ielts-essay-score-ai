@@ -50,6 +50,12 @@ export const UI_TEXT = {
       "Finding Errors...",
       "Preparing The Results...",
     ],
+    ccard: "Criterion Cards",
+    ehe: "Error Highlighted Essay",
+    ehedescription: "Your Essay — Errors Highlighted",
+    grammer: "Grammar",
+    spelling: "Spelling",
+    repetition: "Repetition",
   },
   fa: {
     title: "نمره‌دهی مقاله آیلتس",
@@ -90,6 +96,12 @@ export const UI_TEXT = {
       "یافتن غلط ها ...",
       "آماده سازی نتایج ...",
     ],
+    ccard: "ریز نمرات",
+    ehe: "تصحیح مقاله",
+    ehedescription: "مقاله شما - تصحیح شده",
+    grammer: "گرامر",
+    spelling: "غلط املایی",
+    repetition: "تکرار",
   },
 } as const;
 

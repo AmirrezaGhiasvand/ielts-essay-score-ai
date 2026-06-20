@@ -138,8 +138,8 @@ export default function Chat({
               <div
                 className={`max-w-[85%] rounded-xl px-3 py-2.5 text-sm leading-relaxed ${
                   msg.role === "user"
-                    ? "bg-secondary text-text rounded-br-none"
-                    : "bg-primary  text-text rounded-bl-none border border-border"
+                    ? "bg-primary/50 text-text rounded-br-none"
+                    : "bg-foreground/80  text-text rounded-bl-none border border-border"
                 }`}
               >
                 <div

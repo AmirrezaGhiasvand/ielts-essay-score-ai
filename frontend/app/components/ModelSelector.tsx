@@ -46,7 +46,7 @@ export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
 
   if (loading) {
     return (
-      <div className="flex px-4! py-2! items-center gap-2 text-sm text-slate-600 border border-[#2A2D3A] rounded-lg">
+      <div className="flex px-4! py-2! items-center gap-2 text-sm text-text/60 border border-border rounded-lg">
         <Loader2 size={11} className="animate-spin" />
         <span>Loading models...</span>
       </div>
@@ -57,12 +57,12 @@ export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
     <Menu>
       <MenuButton
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 text-sm text-slate-300 hover:text-white bg-[#1A1D27] border border-[#2A2D3A] hover:border-[#C8102E] rounded-lg px-4! py-2! transition-colors focus:outline-none focus:ring-0 focus-visible:outline-none"
+        className="flex items-center gap-2 text-sm text-text hover:text-white bg-primary/20 border-2 border-border hover:border-primary hover:bg-primary rounded-lg px-4! py-2! transition-colors focus:outline-none duration-250 focus:ring-0 focus-visible:outline-none"
       >
         {selected?.provider === "ollama" ? (
-          <Monitor size={13} className="text-slate-400" />
+          <Monitor size={13} className="text-text" />
         ) : (
-          <Cloud size={13} className="text-slate-400" />
+          <Cloud size={13} className="text-text" />
         )}
         <span className="max-w-35 truncate">
           {selected?.name ?? "Select model"}
@@ -73,16 +73,16 @@ export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
         <MenuItems
           anchor={{ to: "bottom end", gap: "8px" }}
           transition
-          className="p-2 bg-[#1A1D27] border border-[#2A2D3A] rounded-xl shadow-2xl z-30 w-52 overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0"
+          className="p-2 bg-primary/10 border border-border rounded-xl shadow-2xl z-30 w-52 overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0"
         >
           {models && (
             <>
               {/* ---- Local models ---- */}
               {models.ollama_models.length > 0 && (
                 <>
-                  <div className="px-3 py-2 border-b border-[#2A2D3A] flex items-center gap-2">
-                    <Monitor size={11} className="text-slate-500" />
-                    <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                  <div className="px-3 py-2 border-b border-border flex items-center gap-2">
+                    <Monitor size={11} className="text-text" />
+                    <span className="text-[10px] font-semibold text-text uppercase tracking-wider">
                       Local — Ollama
                     </span>
                   </div>
@@ -99,8 +99,8 @@ export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
                           className={`w-full text-left px-3 py-2.5 text-xs transition-colors ${
                             selected?.id === model.id &&
                             selected?.provider === "ollama"
-                              ? "text-[#C8102E] bg-[#C8102E]/10 font-semibold"
-                              : "text-slate-300 hover:text-white hover:bg-[#0F1117]"
+                              ? "text-text bg-primary/60 font-semibold"
+                              : "text-text/80 hover:text-text hover:bg-primary/60"
                           }`}
                         >
                           {model.name}
@@ -113,9 +113,9 @@ export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
               {/* ---- Cloud models ---- */}
               {models.cloud_models.length > 0 && (
                 <>
-                  <div className="px-3 py-2 border-t border-b border-[#2A2D3A] flex items-center gap-2">
-                    <Cloud size={11} className="text-slate-500" />
-                    <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                  <div className="px-3 py-2 border-t border-b border-border flex items-center gap-2">
+                    <Cloud size={11} className="text-text" />
+                    <span className="text-[10px] font-semibold text-text uppercase tracking-wider">
                       Cloud
                     </span>
                   </div>
@@ -127,12 +127,12 @@ export default function ModelSelector({ onModelChange }: ModelSelectorProps) {
                         className={`w-full text-left px-3 py-2.5 text-xs transition-colors flex items-center justify-between ${
                           selected?.id === model.id &&
                           selected?.provider === model.provider
-                            ? "text-[#C8102E] bg-[#C8102E]/10 font-semibold"
-                            : "text-slate-300 hover:text-white hover:bg-[#0F1117]"
+                            ? "text-text bg-primary/60 font-semibold"
+                            : "text-text/80 hover:text-text hover:bg-primary/60"
                         }`}
                       >
                         <span>{model.name}</span>
-                        <span className="text-[9px] text-slate-600 uppercase">
+                        <span className="text-[9px] text-text/60 uppercase">
                           {model.provider}
                         </span>
                       </button>

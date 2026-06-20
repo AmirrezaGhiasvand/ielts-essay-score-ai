@@ -293,7 +293,7 @@ export default function Home() {
                       <Disclosure as="div" className="p-6" defaultOpen>
                         <DisclosureButton className="group flex w-full items-center justify-between">
                           <span className="text-md font-medium text-text group-data-hover:text-text/80">
-                            Criterion cards
+                            {t.ccard}
                           </span>
                           <ChevronDownIcon className="size-5 fill-text group-data-hover:fill-text group-data-open:rotate-180" />
                         </DisclosureButton>
@@ -334,7 +334,7 @@ export default function Home() {
                         <Disclosure as="div" className="p-6" defaultOpen>
                           <DisclosureButton className="group flex w-full items-center justify-between">
                             <span className="text-md font-medium text-text group-data-hover:text-text">
-                              Error highlighted essay
+                              {t.ehe}
                             </span>
                             <ChevronDownIcon className="size-5 fill-text group-data-hover:fill-text group-data-open:rotate-180" />
                           </DisclosureButton>
@@ -346,20 +346,20 @@ export default function Home() {
                               <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs font-semibold text-text/70 uppercase tracking-widest">
-                                    Your Essay — Errors Highlighted
+                                    {t.ehedescription}
                                   </span>
                                   <div className="flex items-center gap-3 text-[10px] text-text/70">
                                     <span className="flex items-center gap-1">
                                       <span className="w-2 h-2 rounded-full bg-orange-400" />{" "}
-                                      Grammar
+                                      {t.grammer}
                                     </span>
                                     <span className="flex items-center gap-1">
                                       <span className="w-2 h-2 rounded-full bg-red-400" />{" "}
-                                      Spelling
+                                      {t.spelling}
                                     </span>
                                     <span className="flex items-center gap-1">
                                       <span className="w-2 h-2 rounded-full bg-stone-400" />{" "}
-                                      Repetition
+                                      {t.repetition}
                                     </span>
                                   </div>
                                 </div>
@@ -401,7 +401,7 @@ export default function Home() {
                   <div className="w-full lg:w-[40%] md:w-[60%] mx-auto">
                     <form
                       onSubmit={handleSubmit(onSubmit)}
-                      className="bg-background rounded-xl border border-foreground p-3 space-y-5 h-[calc(100vh-75px)] flex flex-col"
+                      className="bg-primary/5 rounded-xl border-2 border-primary p-3 space-y-5 h-[calc(100vh-75px)] flex flex-col"
                     >
                       {/* Sample essay button */}
                       <div className="grid grid-cols-2 gap-2">
@@ -409,7 +409,7 @@ export default function Home() {
                           type="button"
                           onClick={handleGenerateSample}
                           disabled={loadingSample}
-                          className="w-full flex items-center justify-center gap-2 text-xs font-medium text-text/60 hover:text-text border border-dashed border-foreground hover:border-border rounded-lg py-2.5 transition-colors disabled:opacity-50"
+                          className="w-full flex items-center bg-primary/20 justify-center gap-2 text-xs font-medium text-text/90  border-2 border-dashed border-border hover:border-foreground hover:bg-primary/70 hover:text-white duration-350 rounded-lg py-2.5 transition-colors disabled:opacity-50 cursor-pointer"
                         >
                           {loadingSample ? (
                             <Loader2 size={13} className="animate-spin" />
@@ -423,14 +423,14 @@ export default function Home() {
                           type="button"
                           onClick={handleExamTopic}
                           disabled={loadingSample}
-                          className="w-full flex items-center justify-center gap-2 text-xs font-medium text-text/60 hover:text-text border border-dashed border-foreground hover:border-border rounded-lg py-2.5 transition-colors disabled:opacity-50"
+                          className="w-full flex items-center bg-primary/20 justify-center gap-2 text-xs font-medium text-text/90  border-2 border-dashed border-border hover:border-foreground hover:bg-primary/70 hover:text-white duration-350 rounded-lg py-2.5 transition-colors disabled:opacity-50 cursor-pointer"
                         >
                           {t.examTopic}
                         </button>
                       </div>
                       {/* Task type */}
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-text/50 uppercase tracking-widest">
+                        <label className="text-xs font-semibold text-text/80 uppercase tracking-widest">
                           {t.taskType}
                         </label>
                         <div className="grid grid-cols-2 gap-2">
@@ -446,10 +446,10 @@ export default function Home() {
                                 }
                                 className={`flex flex-col items-center justify-center p-1 rounded-lg border text-md font-medium transition-all ${
                                   isTask1
-                                    ? "border-foreground text-text/6 cursor-not-allowed opacity-50"
+                                    ? "border-border border-2 text-text cursor-not-allowed opacity-50"
                                     : taskType === type
-                                      ? "border-foreground bg-primary text-secondary cursor-pointer"
-                                      : "border-foreground text-text/50 hover:border-border hover:text-text cursor-pointer"
+                                      ? "border-secondary/30 border-2 bg-primary/60 text-text"
+                                      : "border-secondary/30 border-2 text-text hover:border-border hover:text-text"
                                 }`}
                               >
                                 <input
@@ -461,7 +461,7 @@ export default function Home() {
                                 />
                                 {type === "1" ? t.task1 : t.task2}
                                 {isTask1 && (
-                                  <span className="text-[9px] text-text/6 mt-0.5 font-normal">
+                                  <span className="text-[9px] text-text mt-0.5 font-normal">
                                     coming soon
                                   </span>
                                 )}
@@ -474,12 +474,12 @@ export default function Home() {
                       {/* Question */}
                       <div className="space-y-2">
                         <div className="flex justify-between items-center mb-2">
-                          <label className="text-sm font-semibold text-text/50 uppercase tracking-widest">
+                          <label className="text-sm font-semibold text-text/70 uppercase tracking-widest">
                             {t.question}
                           </label>
                           <div className="relative group inline-flex">
                             <ClipboardPasteIcon
-                              className="text-text/50  w-5 h-5 cursor-pointer hover:text-slate-100 transition-all duration-200 ease-in-out"
+                              className="text-text/70  w-5 h-5 cursor-pointer hover:text-slate-100 transition-all duration-200 ease-in-out"
                               onClick={async () => {
                                 // Get the value from clipboard (Mojtaba)
                                 const text =
@@ -490,9 +490,9 @@ export default function Home() {
                               }}
                             />
 
-                            <div className="absolute -top-11 left-1/2 -translate-x-1/2 rounded bg-red-500 px-2 py-2 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
+                            <div className="absolute -top-11 left-1/2 -translate-x-1/2 rounded-lg bg-primary px-2 py-2 text-sm text-text opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
                               {t.paste}
-                              <div className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-red-500" />
+                              <div className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-primary" />
                             </div>
                           </div>
                         </div>
@@ -502,7 +502,7 @@ export default function Home() {
                           placeholder={t.questionPlaceholder}
                           rows={3}
                           dir={dirtyFields.question ? "ltr" : langInfo!.dir}
-                          className="w-full resize-none rounded-lg bg-[#0F1117] border border-foreground p-2 text-base text-slate-200 placeholder:text-text/6 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors"
+                          className="w-full resize-none rounded-lg bg-background border-2 border-border p-2 text-base text-text placeholder:text-text/50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                         />
                         {errors.question && (
                           <p className="text-xs text-red-400">
@@ -514,7 +514,7 @@ export default function Home() {
                       {/* Essay */}
                       <div className="space-y-2 flex-1 flex flex-col">
                         <div className="flex items-center justify-between">
-                          <label className="text-sm font-semibold text-text/50 uppercase tracking-widest">
+                          <label className="text-sm font-semibold text-text/70 uppercase tracking-widest">
                             {t.essay}
                           </label>
                           <div className="flex items-center justify-between gap-2">
@@ -522,12 +522,12 @@ export default function Home() {
                               className={`text-xs font-medium tabular-nums ${
                                 wordCountOk
                                   ? "text-green-400"
-                                  : "text-text/6"
+                                  : "text-text/80"
                               }`}
                             >
                               {wordCount}
                               {!wordCountOk && (
-                                <span className="text-text/6 font-normal">
+                                <span className="text-text/80 font-normal">
                                   /{minWords}
                                 </span>
                               )}{" "}
@@ -535,7 +535,7 @@ export default function Home() {
                             </span>
                             <div className="relative group inline-flex">
                               <ClipboardPasteIcon
-                                className="text-text/50  w-5 h-5 cursor-pointer hover:text-slate-100 transition-all duration-200 ease-in-out"
+                                className="text-text/70  w-5 h-5 cursor-pointer hover:text-slate-100 transition-all duration-200 ease-in-out"
                                 onClick={async () => {
                                   // Get the value from clipboard (Mojtaba)
                                   const text =
@@ -545,9 +545,9 @@ export default function Home() {
                                   });
                                 }}
                               />
-                              <div className="absolute -top-11 left-1/2 -translate-x-1/2 rounded bg-red-500 px-2 py-2 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
-                                {t.paste}
-                                <div className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-red-500" />
+                              <div className="absolute -top-11 left-1/2 -translate-x-1/2 rounded-lg bg-primary px-2 py-2 text-sm text-text opacity-0 transition-opacity group-hover:opacity-100 pointer-events-none">
+                              {t.paste}
+                              <div className="absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 bg-primary" />
                               </div>
                             </div>
                           </div>
@@ -558,7 +558,7 @@ export default function Home() {
                           placeholder={t.essayPlaceholder}
                           rows={10}
                           dir={dirtyFields.essay ? "ltr" : langInfo!.dir}
-                          className="w-full flex-1 resize-none rounded-lg bg-[#0F1117] border border-foreground p-2 text-base text-slate-200 placeholder:text-text/6 focus:outline-none focus:ring-1 focus:ring-[#C8102E] focus:border-[#C8102E] transition-colors font-(--font-geist-mono)"
+                          className="w-full flex-1 resize-none rounded-lg bg-background border-2 border-border p-2 text-base text-text placeholder:text-text/50 focus:outline-none focus:ring-2 focus:ring-border focus:border-border transition-colors font-(--font-geist-mono)"
                         />
                         {errors.essay && (
                           <p className="text-xs text-red-400">
@@ -579,7 +579,7 @@ export default function Home() {
                         <button
                           type="submit"
                           disabled={loading || !wordCountOk}
-                          className="w-1/2 mx-auto bg-[#C8102E] text-white rounded-lg py-1 text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                          className="w-3/4 mx-auto bg-primary/20 border-2 border-border hover:border-primary hover:bg-primary rounded-lg py-1 text-base text-text font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                         >
                           {loading ? (
                             <>
@@ -593,7 +593,7 @@ export default function Home() {
                         <button
                           type="button"
                           disabled={!isDirty}
-                          className="w-1/2 mx-auto bg-[#C8102E] text-white rounded-lg py-1 text-base font-semibold hover:bg-[#A50E26] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                          className="w-1/4 mx-auto bg-primary/20 border-2 border-border hover:border-primary hover:bg-primary rounded-lg py-1 text-base text-text font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                           onClick={() => reset()}
                         >
                           {t.clear}
