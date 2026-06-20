@@ -107,6 +107,7 @@ export default function Home() {
                       essay={submittedEssay}
                       scoringResult={result}
                       language={language}
+                      langInfo={langInfo}
                       placeholder={t.chatPlaceholder}
                       sendLabel={t.chatSend}
                       title={t.chatTitle}
