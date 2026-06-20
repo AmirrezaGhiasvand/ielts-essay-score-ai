@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ScoringResponse } from "@/app/types";
@@ -12,6 +12,7 @@ import ResultsPanel from "./components/ResultsPanel";
 import { useLanguageContext } from "./contexts/LangaugeContext";
 import MainForm from "./components/MainForm";
 import { EssayFormData, formSchema } from "./lib/form";
+import ApiKeyInput from "./components/ApiKeyInput";
 
 // -------- Page --------
 export default function Home() {
@@ -21,6 +22,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submittedEssay, setSubmittedEssay] = useState("");
+  const [mounted, setMounted] = useState(false);
+  const [openrouterKey, setOpenrouterKey] = useState<string | null>(null);
 
   const methods = useForm<EssayFormData>({
     resolver: zodResolver(formSchema),
@@ -30,6 +33,15 @@ export default function Home() {
       question: "",
     },
   });
+
+  useEffect(() => {
+    setMounted(true);
+    setOpenrouterKey(localStorage.getItem("openrouter_key"));
+  }, []);
+
+  if (!mounted) {
+    return null; // or a loader skeleton
+  }
 
   // -------- Submit --------
   async function onSubmit(data: EssayFormData) {
@@ -72,65 +84,73 @@ export default function Home() {
       <MainHeader />
       {/* ---- Main ---- */}
       <main className="w-full px-3 py-2">
-        {/* Loading */}
-        {loading ? (
-          <div className="min-h-[calc(100vh-75px)] flex justify-center items-center text-text">
-            <TextType
-              className="text-3xl"
-              text={[...t.loading]}
-              typingSpeed={75}
-              pauseDuration={1500}
-              showCursor
-              cursorCharacter="|"
-              deletingSpeed={100}
-              cursorBlinkDuration={0.5}
-              loop={false}
-            />
-          </div>
-        ) : (
-          <div className="flex justify-center items-stretch min-h-[calc(100vh-75px)]">
-            <div className="flex justify-center items-stretch gap-3 w-full lg:flex-row flex-col">
-              {result ? (
-                <>
-                  {/* ---- Results panel ---- */}
-                  <ResultsPanel
-                    result={result}
-                    submittedEssay={submittedEssay}
-                    handleReset={handleReset}
-                  />
-
-                  {/* ---- Chat panel ---- */}
-                  <div
-                    className={`transition-all duration-300 min-w-1/2 lg:sticky lg:top-16 lg:self-stretch lg:max-h-[calc(100vh-75px)] h-full`}
-                  >
-                    <Chat
-                      essay={submittedEssay}
-                      scoringResult={result}
-                      language={language}
-                      langInfo={langInfo}
-                      placeholder={t.chatPlaceholder}
-                      sendLabel={t.chatSend}
-                      title={t.chatTitle}
-                      provider={selectedProvider}
-                      model={selectedModel}
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  {/* ---- Essay Form  ---- */}
-                  <div className="w-full lg:w-[40%] md:w-[60%] mx-auto">
-                    <FormProvider {...methods}>
-                      <MainForm
-                        onSubmit={onSubmit}
-                        error={error}
-                        setError={setError}
-                      />
-                    </FormProvider>
-                  </div>
-                </>
-              )}
+        {openrouterKey ? (
+          loading ? (
+            <div className="min-h-[calc(100vh-75px)] flex justify-center items-center text-text">
+              <TextType
+                className="text-3xl"
+                text={[...t.loading]}
+                typingSpeed={75}
+                pauseDuration={1500}
+                showCursor
+                cursorCharacter="|"
+                deletingSpeed={100}
+                cursorBlinkDuration={0.5}
+                loop={false}
+              />
             </div>
+          ) : (
+            <div className="flex justify-center items-stretch min-h-[calc(100vh-75px)]">
+              <div className="flex justify-center items-stretch gap-3 w-full lg:flex-row flex-col">
+                {result ? (
+                  <>
+                    {/* ---- Results panel ---- */}
+                    <ResultsPanel
+                      result={result}
+                      submittedEssay={submittedEssay}
+                      handleReset={handleReset}
+                    />
+
+                    {/* ---- Chat panel ---- */}
+                    <div className="transition-all duration-300 min-w-1/2 lg:sticky lg:top-16 lg:self-stretch lg:max-h-[calc(100vh-75px)] h-full">
+                      <Chat
+                        essay={submittedEssay}
+                        scoringResult={result}
+                        language={language}
+                        langInfo={langInfo}
+                        placeholder={t.chatPlaceholder}
+                        sendLabel={t.chatSend}
+                        title={t.chatTitle}
+                        provider={selectedProvider}
+                        model={selectedModel}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* ---- Essay Form ---- */}
+                    <div className="w-full lg:w-[40%] md:w-[60%] mx-auto">
+                      <FormProvider {...methods}>
+                        <MainForm
+                          onSubmit={onSubmit}
+                          error={error}
+                          setError={setError}
+                        />
+                      </FormProvider>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )
+        ) : (
+          <div className="h-screen flex justify-center items-center">
+            <ApiKeyInput
+              onSave={(key: string) => {
+                console.log("API Key:", key);
+                setOpenrouterKey(key);
+              }}
+            />
           </div>
         )}
       </main>
