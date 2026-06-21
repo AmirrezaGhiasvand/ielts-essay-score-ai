@@ -68,7 +68,7 @@ const MainForm = ({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="bg-primary/5 rounded-xl border-2 border-primary p-3 space-y-5 h-[calc(100vh-75px)] flex flex-col"
+      className="bg-primary/5 rounded-xl border-2 border-primary p-3 space-y-5 min-h-[calc(100vh-91px)] flex flex-col"
     >
       {/* Sample essay button */}
       <div className="grid grid-cols-2 gap-2">

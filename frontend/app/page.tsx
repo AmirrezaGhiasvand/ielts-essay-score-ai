@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ScoringResponse } from "@/app/types";
+import { Language, ScoringResponse } from "@/app/types";
 import { scoreEssay } from "@/app/lib/api";
 import Chat from "@/app/components/Chat";
 import TextType from "./components/TextType";
@@ -16,8 +16,14 @@ import ApiKeyInput from "./components/ApiKeyInput";
 
 // -------- Page --------
 export default function Home() {
-  const { language, selectedModel, selectedProvider, langInfo, t } =
-    useLanguageContext();
+  const {
+    language,
+    setLanguage,
+    selectedModel,
+    selectedProvider,
+    langInfo,
+    t,
+  } = useLanguageContext();
   const [result, setResult] = useState<ScoringResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +43,7 @@ export default function Home() {
   useEffect(() => {
     setMounted(true);
     setApiKey(localStorage.getItem("openrouter_key"));
+    setLanguage((localStorage.getItem("lang") as Language) || "en");
   }, []);
 
   if (!mounted) {
@@ -94,10 +101,10 @@ export default function Home() {
         <MainHeader apiKey={apiKey as string} setApiKey={setApiKey} />
       )}
       {/* ---- Main ---- */}
-      <main className="w-full px-3 py-2">
+      <main className="w-full px-3 md:py-2 pt-10">
         {apiKey ? (
           loading ? (
-            <div className="min-h-[calc(100vh-75px)] flex justify-center items-center text-text">
+            <div className="flex justify-center h-screen items-center text-text">
               <TextType
                 className="text-3xl"
                 text={[...t.loading]}
@@ -111,7 +118,7 @@ export default function Home() {
               />
             </div>
           ) : (
-            <div className="flex justify-center items-stretch min-h-[calc(100vh-75px)]">
+            <div className="flex justify-center items-stretch md:min-h-[calc(100vh-91px)]">
               <div className="flex justify-center items-stretch gap-3 w-full lg:flex-row flex-col">
                 {result ? (
                   <>
@@ -123,7 +130,7 @@ export default function Home() {
                     />
 
                     {/* ---- Chat panel ---- */}
-                    <div className="transition-all duration-300 min-w-1/2 lg:sticky lg:top-16 lg:self-stretch lg:max-h-[calc(100vh-75px)] h-full">
+                    <div className="transition-all duration-300 min-w-1/2 lg:sticky lg:top-20 lg:self-stretch lg:h-[calc(100vh-91px)] h-[calc(100vh-10px)] md:h-[calc(100vh-90px)] md:pb-0 pb-5">
                       <Chat
                         essay={submittedEssay}
                         scoringResult={result}
@@ -140,7 +147,7 @@ export default function Home() {
                 ) : (
                   <>
                     {/* ---- Essay Form ---- */}
-                    <div className="w-full xl:w-[45%] lg:w-[60%] md:w-full mx-auto">
+                    <div className="w-full xl:w-[45%] lg:w-[60%] md:w-full mx-auto ">
                       <FormProvider {...methods}>
                         <MainForm
                           onSubmit={onSubmit}
