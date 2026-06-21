@@ -10,7 +10,7 @@ interface BandGaugeProps {
   language?: string;
 }
 
-function getBandColor(score: number): string {
+export function getBandColor(score: number): string {
   if (score >= 8)  return "#22C55E";
   if (score >= 7)  return "#3B82F6";
   if (score >= 6)  return "#F59E0B";

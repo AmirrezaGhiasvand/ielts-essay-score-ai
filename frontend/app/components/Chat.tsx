@@ -16,6 +16,7 @@ interface ChatProps {
   title: string;
   provider: string;
   model: string;
+  api_key: string;
 }
 export default function Chat({
   essay,
@@ -27,6 +28,7 @@ export default function Chat({
   title,
   provider,
   model,
+  api_key,
 }: ChatProps) {
   const [history, setHistory] = useState<ChatMessage[]>([]);
   const [message, setMessage] = useState("");
@@ -84,6 +86,7 @@ export default function Chat({
           language,
           provider,
           model,
+          api_key,
         },
         (chunk: string) => {
           accumulated += chunk;

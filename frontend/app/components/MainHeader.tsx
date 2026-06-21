@@ -17,12 +17,14 @@ const MainHeader = ({
   result,
   setResult,
   setSubmittedEssay,
+  submittedEssay,
 }: {
   apiKey: string;
   setApiKey: (value: SetStateAction<string | null>) => void;
   result: ScoringResponse | null;
   setResult: Dispatch<SetStateAction<ScoringResponse | null>>;
   setSubmittedEssay: Dispatch<SetStateAction<string>>;
+  submittedEssay: string;
 }) => {
   const { language, setLanguage, setSelectedModel, setSelectedProvider, t } =
     useLanguageContext();
@@ -84,6 +86,7 @@ const MainHeader = ({
             result={result}
             setResult={setResult}
             setSubmittedEssay={setSubmittedEssay}
+            submittedEssay={submittedEssay}
           />
 
           {/* Api key control */}
