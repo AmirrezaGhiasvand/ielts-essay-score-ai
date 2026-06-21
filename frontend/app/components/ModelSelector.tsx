@@ -80,7 +80,7 @@ export default function ModelSelector({
         <MenuItems
           anchor={{ to: "bottom end", gap: "8px" }}
           transition
-          className="p-2 bg-primary/10 border border-border rounded-xl shadow-2xl z-30 w-52 overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0"
+          className="p-2 bg-muted border border-border rounded-xl shadow-2xl z-30 w-52 overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0"
         >
           {models && (
             <>
@@ -101,7 +101,6 @@ export default function ModelSelector({
                     .map((model) => (
                       <MenuItem key={model.id}>
                         <button
-                          key={model.id}
                           onClick={() => handleSelect(model)}
                           className={`w-full text-left px-3 py-2.5 text-xs transition-colors ${
                             selected?.id === model.id &&
@@ -127,9 +126,8 @@ export default function ModelSelector({
                     </span>
                   </div>
                   {models.cloud_models.map((model) => (
-                    <MenuItem>
+                    <MenuItem key={`${model.provider}-${model.id}`}>
                       <button
-                        key={`${model.provider}-${model.id}`}
                         onClick={() => handleSelect(model)}
                         className={`w-full text-left px-3 py-2.5 text-xs transition-colors flex items-center justify-between ${
                           selected?.id === model.id &&

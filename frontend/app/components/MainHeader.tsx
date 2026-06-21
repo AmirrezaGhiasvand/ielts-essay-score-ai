@@ -59,7 +59,7 @@ const MainHeader = ({
             <MenuItems
               anchor={{ to: "bottom end", gap: "8px" }}
               transition
-              className="p-2 bg-primary/10 border border-border rounded-xl shadow-2xl z-30 w-60 overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0"
+              className="p-2 bg-muted border border-border rounded-xl shadow-2xl z-30 w-60 overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0"
             >
               <MenuItem>
                 {({ close }) => (
@@ -92,7 +92,7 @@ const MainHeader = ({
           <MenuItems
             anchor={{ to: "bottom end", gap: "8px" }}
             transition
-            className="p-2 bg-primary/10 border border-border rounded-xl shadow-2xl z-30 w-32 overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0"
+            className="p-2 bg-muted border border-border rounded-xl shadow-2xl z-30 w-32 overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0"
           >
             {LANGUAGES.map((lang) => (
               <MenuItem key={lang.code}>
