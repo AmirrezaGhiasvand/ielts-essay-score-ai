@@ -62,9 +62,17 @@ export default function Home() {
       });
       setResult(response);
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { detail?: string } } })?.response?.data
-          ?.detail ?? t.errorGeneral;
+      let message = (err as { response?: { data?: { detail?: string } } })
+        ?.response?.data?.detail;
+
+      if (message?.startsWith("Error code: 401")) {
+        message = t.errorWrongKey;
+      } else if (message?.startsWith("Connection error")) {
+        message = t.errorConnection;
+      } else {
+        message = t.errorGeneral;
+      }
+
       setError(message);
     } finally {
       setLoading(false);
@@ -82,7 +90,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background" dir={langInfo!.dir}>
       {/* ---- Header ---- */}
-      <MainHeader apiKey={apiKey as string} />
+      {loading ? null : <MainHeader apiKey={apiKey as string} />}
       {/* ---- Main ---- */}
       <main className="w-full px-3 py-2">
         {apiKey ? (
