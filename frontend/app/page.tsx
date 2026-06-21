@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Language, ScoringResponse } from "@/app/types";
+import { HistoryItem, Language, ScoringResponse } from "@/app/types";
 import { scoreEssay } from "@/app/lib/api";
 import Chat from "@/app/components/Chat";
 import TextType from "./components/TextType";
@@ -68,6 +68,21 @@ export default function Home() {
         api_key: apiKey as string,
       });
       setResult(response);
+
+      // Save full History item (Mojtaba)
+      const existing = localStorage.getItem("results");
+
+      const parsed: HistoryItem[] = existing ? JSON.parse(existing) : [];
+
+      const newItem: HistoryItem = {
+        question: data.question,
+        essay: data.essay,
+        result: response,
+      };
+
+      parsed.push(newItem);
+
+      localStorage.setItem("results", JSON.stringify(parsed));
     } catch (err: unknown) {
       let message = (err as { response?: { data?: { detail?: string } } })
         ?.response?.data?.detail;
@@ -98,13 +113,19 @@ export default function Home() {
     <div className="min-h-screen bg-background" dir={langInfo!.dir}>
       {/* ---- Header ---- */}
       {loading ? null : (
-        <MainHeader apiKey={apiKey as string} setApiKey={setApiKey} />
+        <MainHeader
+          apiKey={apiKey as string}
+          setApiKey={setApiKey}
+          result={result}
+          setResult={setResult}
+          setSubmittedEssay={setSubmittedEssay}
+        />
       )}
       {/* ---- Main ---- */}
       <main className="w-full px-3 md:py-2 pt-10">
         {apiKey ? (
           loading ? (
-            <div className="flex justify-center h-screen items-center text-text">
+            <div className="flex justify-center min-h-[calc(100vh-91px)] items-center text-text">
               <TextType
                 className="text-3xl"
                 text={[...t.loading]}

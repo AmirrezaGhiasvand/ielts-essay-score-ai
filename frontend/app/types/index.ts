@@ -70,3 +70,9 @@ export interface LanguageOption {
   label: string;
   dir: "ltr" | "rtl";
 }
+
+export type HistoryItem = {
+  question: string;
+  essay: string;
+  result: ScoringResponse;
+};

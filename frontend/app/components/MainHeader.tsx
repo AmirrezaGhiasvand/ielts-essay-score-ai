@@ -8,13 +8,21 @@ import { LANGUAGES } from "@/app/lib/languages";
 import { useLanguageContext } from "../contexts/LangaugeContext";
 import ApiKeyInput from "./ApiKeyInput";
 import HeaderApiKeyInput from "./HeaderApiKeyInput";
+import HistorySelector from "./HistorySelector";
+import { ScoringResponse } from "../types";
 
 const MainHeader = ({
   apiKey,
   setApiKey,
+  result,
+  setResult,
+  setSubmittedEssay,
 }: {
   apiKey: string;
   setApiKey: (value: SetStateAction<string | null>) => void;
+  result: ScoringResponse | null;
+  setResult: Dispatch<SetStateAction<ScoringResponse | null>>;
+  setSubmittedEssay: Dispatch<SetStateAction<string>>;
 }) => {
   const { language, setLanguage, setSelectedModel, setSelectedProvider, t } =
     useLanguageContext();
@@ -71,6 +79,13 @@ const MainHeader = ({
 
         {/* ---- Controls ---- */}
         <div className="flex items-center md:flex-row flex-col gap-4">
+          {/* Result History */}
+          <HistorySelector
+            result={result}
+            setResult={setResult}
+            setSubmittedEssay={setSubmittedEssay}
+          />
+
           {/* Api key control */}
           {apiKey ? (
             <Menu>
