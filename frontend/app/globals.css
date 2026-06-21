@@ -3,6 +3,7 @@
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
   --color-border: var(--border);
   --color-primary: var(--primary);
   --color-secondary: var(--secondary);
@@ -12,6 +13,7 @@
 :root {
   --background: #151212;
   --foreground: #2d2727;
+  --muted: #261712;
   --border: #915b4a;
   --primary: #a96851;
   --secondary: #85341b;

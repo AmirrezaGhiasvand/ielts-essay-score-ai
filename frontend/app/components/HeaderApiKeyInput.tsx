@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLanguageContext } from "../contexts/LangaugeContext";
 
-export default function ApiKeyInput({
+export default function HeaderApiKeyInput({
   onSave,
 }: {
   onSave?: (key: string) => void;
@@ -25,25 +25,19 @@ export default function ApiKeyInput({
   }
 
   return (
-    <div className="w-full max-w-md p-4 rounded-xl border-2 border-border bg-primary/5 flex flex-col justify-center items-center gap-5">
-      <label className="text-md font-semibold text-text/70 uppercase tracking-widest">
-        {t.titleApiKey}
-      </label>
-
+    <div className="flex flex-col justify-center items-center gap-2 text-sm">
       <input
         type="password"
         value={apiKey}
         onChange={(e) => setApiKey(e.target.value)}
         placeholder="sk-or-..."
         className="w-full rounded-lg border-2 border-border bg-background p-2 text-text focus:outline-none focus:ring-2 focus:ring-primary"
-        dir="ltr"
       />
 
       <button
         onClick={handleSave}
         disabled={!apiKey.trim()}
         className="w-full bg-primary/60 border-2 border-border hover:border-primary hover:bg-primary rounded-lg py-2 text-text font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-        dir="ltr"
       >
         {t.submitApiKey}
       </button>

@@ -1,4 +1,5 @@
 import { ChevronDownIcon, Clock, RotateCcw } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import BandGauge from "./BandGauge";
 import { useLanguageContext } from "../contexts/LangaugeContext";
 import { ScoringResponse } from "../types";
@@ -59,88 +60,124 @@ const ResultsPanel = ({
 
       <div className="mx-auto w-full min-h-0 overflow-visible divide-y divide-foreground rounded-xl bg-primary/5">
         <Disclosure as="div" className="p-6" defaultOpen>
-          <DisclosureButton className="group flex w-full items-center justify-between">
-            <span className="text-md font-medium text-text group-data-hover:text-text/80">
-              {t.ccard}
-            </span>
-            <ChevronDownIcon className="size-5 fill-text group-data-hover:fill-text group-data-open:rotate-180" />
-          </DisclosureButton>
-          <DisclosurePanel
-            transition
-            className="mt-2 text-sm/5 text-text origin-top transition duration-200 ease-out data-closed:-translate-y-6 data-closed:opacity-0 "
-          >
-            {/* Criterion cards */}
-            <div
-              className={`grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-hidden transition-[max-height,opacity] duration-350 ease-in-out max-h-150 opacity-100
-                                  `}
-            >
-              <CriterionCard
-                title={t.taskAchievement}
-                data={result.task_achievement}
-                feedbackLabel={t.feedback}
-              />
-              <CriterionCard
-                title={t.coherence}
-                data={result.coherence_cohesion}
-                feedbackLabel={t.feedback}
-              />
-              <CriterionCard
-                title={t.lexical}
-                data={result.lexical_resource}
-                feedbackLabel={t.feedback}
-              />
-              <CriterionCard
-                title={t.grammar}
-                data={result.grammatical_range_accuracy}
-                feedbackLabel={t.feedback}
-              />
-            </div>
-          </DisclosurePanel>
+          {({ open }) => (
+            <>
+              <DisclosureButton className="group flex w-full items-center justify-between">
+                <span className="text-md font-medium text-text group-hover:text-text/80">
+                  {t.ccard}
+                </span>
+
+                <ChevronDownIcon
+                  className={`size-5 fill-text transition-transform duration-300 ${
+                    open ? "rotate-180" : ""
+                  }`}
+                />
+              </DisclosureButton>
+
+              <AnimatePresence initial={false}>
+                {open && (
+                  <DisclosurePanel static>
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{
+                        duration: 0.3,
+                        ease: "easeInOut",
+                      }}
+                    >
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3">
+                        <CriterionCard
+                          title={t.taskAchievement}
+                          data={result.task_achievement}
+                          feedbackLabel={t.feedback}
+                        />
+                        <CriterionCard
+                          title={t.coherence}
+                          data={result.coherence_cohesion}
+                          feedbackLabel={t.feedback}
+                        />
+                        <CriterionCard
+                          title={t.lexical}
+                          data={result.lexical_resource}
+                          feedbackLabel={t.feedback}
+                        />
+                        <CriterionCard
+                          title={t.grammar}
+                          data={result.grammatical_range_accuracy}
+                          feedbackLabel={t.feedback}
+                        />
+                      </div>
+                    </motion.div>
+                  </DisclosurePanel>
+                )}
+              </AnimatePresence>
+            </>
+          )}
         </Disclosure>
         {/* Error-highlighted essay */}
         {result.text_errors.length > 0 && (
           <Disclosure as="div" className="p-6" defaultOpen>
-            <DisclosureButton className="group flex w-full items-center justify-between">
-              <span className="text-md font-medium text-text group-data-hover:text-text">
-                {t.ehe}
-              </span>
-              <ChevronDownIcon className="size-5 fill-text group-data-hover:fill-text group-data-open:rotate-180" />
-            </DisclosureButton>
-            <DisclosurePanel
-              transition
-              className="mt-2 text-sm/5 text-text origin-top transition duration-200 ease-out data-closed:-translate-y-6 data-closed:opacity-0 "
-            >
+            {({ open }) => (
               <>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-text/70 uppercase tracking-widest">
-                      {t.ehedescription}
-                    </span>
-                    <div className="flex items-center gap-3 text-[10px] text-text/70">
-                      <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-orange-400" />{" "}
-                        {t.grammer}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-red-400" />{" "}
-                        {t.spelling}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-stone-400" />{" "}
-                        {t.repetition}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="bg-background border border-foreground rounded-lg p-4 text-sm text-text/90">
-                    <ErrorHighlightedEssay
-                      essay={submittedEssay}
-                      errors={result.text_errors}
-                    />
-                  </div>
-                </div>
-                <div className="border-t border-foreground" />
+                <DisclosureButton className="group flex w-full items-center justify-between">
+                  <span className="text-md font-medium text-text group-hover:text-text">
+                    {t.ehe}
+                  </span>
+
+                  <ChevronDownIcon
+                    className={`size-5 fill-text transition-transform duration-300 ${
+                      open ? "rotate-180" : ""
+                    }`}
+                  />
+                </DisclosureButton>
+
+                <AnimatePresence initial={false}>
+                  {open && (
+                    <DisclosurePanel static>
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                      >
+                        <div className="mt-2 space-y-2 text-sm/5 text-text">
+                          {/* Header row */}
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-semibold text-text/70 uppercase tracking-widest">
+                              {t.ehedescription}
+                            </span>
+
+                            <div className="flex items-center gap-3 text-[10px] text-text/70">
+                              <span className="flex items-center gap-1">
+                                <span className="w-2 h-2 rounded-full bg-orange-400" />
+                                {t.grammer}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <span className="w-2 h-2 rounded-full bg-red-400" />
+                                {t.spelling}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <span className="w-2 h-2 rounded-full bg-stone-400" />
+                                {t.repetition}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Essay box */}
+                          <div className="bg-background border border-foreground rounded-lg p-4 text-sm text-text/90">
+                            <ErrorHighlightedEssay
+                              essay={submittedEssay}
+                              errors={result.text_errors}
+                            />
+                          </div>
+                        </div>
+                      </motion.div>
+                    </DisclosurePanel>
+                  )}
+                </AnimatePresence>
               </>
-            </DisclosurePanel>
+            )}
           </Disclosure>
         )}
       </div>

@@ -64,7 +64,7 @@ export default function ModelSelector({
     <Menu>
       <MenuButton
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 text-sm text-text hover:text-white bg-primary/20 border-2 border-border hover:border-primary hover:bg-primary rounded-lg px-4! py-2! transition-colors focus:outline-none duration-250 focus:ring-0 focus-visible:outline-none"
+        className="flex items-center justify-center gap-2 md:text-sm md:w-full w-[75vw] text-text hover:text-white bg-primary/20 border-2 border-border hover:border-primary hover:bg-primary rounded-lg px-4! py-2! transition-colors focus:outline-none duration-250 focus:ring-0 focus-visible:outline-none"
       >
         {selected?.provider === "ollama" ? (
           <Monitor size={13} className="text-text" />
@@ -80,7 +80,7 @@ export default function ModelSelector({
         <MenuItems
           anchor={{ to: "bottom end", gap: "8px" }}
           transition
-          className="p-2 bg-primary/10 border border-border rounded-xl shadow-2xl z-30 w-52 overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0"
+          className="md:p-2 p-4 bg-muted border border-border rounded-xl shadow-2xl z-30 md:w-52 w-[75vw] overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0 "
         >
           {models && (
             <>
@@ -99,11 +99,10 @@ export default function ModelSelector({
                       (m) => !m.id.includes("embed") && !m.id.includes("cloud"),
                     )
                     .map((model) => (
-                      <MenuItem>
+                      <MenuItem key={model.id}>
                         <button
-                          key={model.id}
                           onClick={() => handleSelect(model)}
-                          className={`w-full text-left px-3 py-2.5 text-xs transition-colors ${
+                          className={`w-full text-left px-3 py-2.5 text-xs transition-colors rounded-xl ${
                             selected?.id === model.id &&
                             selected?.provider === "ollama"
                               ? "text-text bg-primary/60 font-semibold"
@@ -127,11 +126,10 @@ export default function ModelSelector({
                     </span>
                   </div>
                   {models.cloud_models.map((model) => (
-                    <MenuItem>
+                    <MenuItem key={`${model.provider}-${model.id}`}>
                       <button
-                        key={`${model.provider}-${model.id}`}
                         onClick={() => handleSelect(model)}
-                        className={`w-full text-left px-3 py-2.5 text-xs transition-colors flex items-center justify-between ${
+                        className={`w-full text-left px-3 py-2.5 text-xs transition-colors flex items-center justify-between rounded-xl mt-2 ${
                           selected?.id === model.id &&
                           selected?.provider === model.provider
                             ? "text-text bg-primary/60 font-semibold"
