@@ -99,7 +99,7 @@ export default function ModelSelector({
                       (m) => !m.id.includes("embed") && !m.id.includes("cloud"),
                     )
                     .map((model) => (
-                      <MenuItem>
+                      <MenuItem key={model.id}>
                         <button
                           key={model.id}
                           onClick={() => handleSelect(model)}

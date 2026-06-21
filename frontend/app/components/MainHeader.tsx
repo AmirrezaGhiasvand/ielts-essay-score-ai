@@ -6,8 +6,16 @@ import { ChevronDown } from "lucide-react";
 import { Dispatch, SetStateAction, useState } from "react";
 import { LANGUAGES } from "@/app/lib/languages";
 import { useLanguageContext } from "../contexts/LangaugeContext";
+import ApiKeyInput from "./ApiKeyInput";
+import HeaderApiKeyInput from "./HeaderApiKeyInput";
 
-const MainHeader = ({ apiKey }: { apiKey: string }) => {
+const MainHeader = ({
+  apiKey,
+  setApiKey,
+}: {
+  apiKey: string;
+  setApiKey: (value: SetStateAction<string | null>) => void;
+}) => {
   const { language, setLanguage, setSelectedModel, setSelectedProvider, t } =
     useLanguageContext();
 
@@ -38,10 +46,41 @@ const MainHeader = ({ apiKey }: { apiKey: string }) => {
 
       {/* ---- Controls ---- */}
       <div className="flex items-center gap-4">
+        {/* Api key control */}
+        {apiKey ? (
+          <Menu>
+            <MenuButton
+              onClick={() => setLangOpen(!langOpen)}
+              className="flex items-center gap-2 text-sm text-text hover:text-white bg-primary/20 border-2 border-border hover:border-primary hover:bg-primary rounded-lg px-4! py-2! transition-colors focus:outline-none duration-250 focus:ring-0 focus-visible:outline-none"
+            >
+              {t.apiKey}
+              <ChevronDown size={11} />
+            </MenuButton>
+            <MenuItems
+              anchor={{ to: "bottom end", gap: "8px" }}
+              transition
+              className="p-2 bg-primary/10 border border-border rounded-xl shadow-2xl z-30 w-60 overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0"
+            >
+              <MenuItem>
+                {({ close }) => (
+                  <HeaderApiKeyInput
+                    onSave={(key: string) => {
+                      console.log("API Key:", key);
+                      setApiKey(key);
+                      close();
+                    }}
+                  />
+                )}
+              </MenuItem>
+            </MenuItems>
+          </Menu>
+        ) : null}
+        {/* Model selector */}
         <ModelSelector
           onModelChange={handleModelChange}
           hasApiKey={apiKey?.length > 0}
         />
+        {/* Language selector */}
         <Menu>
           <MenuButton
             onClick={() => setLangOpen(!langOpen)}

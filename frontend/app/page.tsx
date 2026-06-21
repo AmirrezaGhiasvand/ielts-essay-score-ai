@@ -90,7 +90,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background" dir={langInfo!.dir}>
       {/* ---- Header ---- */}
-      {loading ? null : <MainHeader apiKey={apiKey as string} />}
+      {loading ? null : (
+        <MainHeader apiKey={apiKey as string} setApiKey={setApiKey} />
+      )}
       {/* ---- Main ---- */}
       <main className="w-full px-3 py-2">
         {apiKey ? (
@@ -138,7 +140,7 @@ export default function Home() {
                 ) : (
                   <>
                     {/* ---- Essay Form ---- */}
-                    <div className="w-full lg:w-[40%] md:w-[60%] mx-auto">
+                    <div className="w-full xl:w-[45%] lg:w-[60%] md:w-full mx-auto">
                       <FormProvider {...methods}>
                         <MainForm
                           onSubmit={onSubmit}
@@ -153,7 +155,7 @@ export default function Home() {
             </div>
           )
         ) : (
-          <div className="h-screen flex justify-center items-center">
+          <div className="h-[calc(100vh-75px)] flex justify-center items-center">
             <ApiKeyInput
               onSave={(key: string) => {
                 console.log("API Key:", key);
