@@ -1,25 +1,33 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Trash2 } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { HistoryItem, ScoringResponse } from "../types";
+import { getBandColor } from "./BandGauge";
 
 const HistorySelector = ({
   result,
   setResult,
   setSubmittedEssay,
+  submittedEssay,
 }: {
   result: ScoringResponse | null;
   setResult: Dispatch<SetStateAction<ScoringResponse | null>>;
   setSubmittedEssay: Dispatch<SetStateAction<string>>;
+  submittedEssay: string;
 }) => {
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+
   useEffect(() => {
     const stored = localStorage.getItem("results");
     if (!stored) return;
-    console.log(stored);
-
     setHistoryItems(JSON.parse(stored) || []);
   }, []);
+
+  function handleDelete(index: number) {
+    const updated = historyItems.filter((_, idx) => idx !== index);
+    localStorage.setItem("results", JSON.stringify(updated));
+    setHistoryItems(updated);
+  }
 
   return (
     <Menu>
@@ -36,25 +44,45 @@ const HistorySelector = ({
           historyItems.map((item, i) => (
             <div key={i}>
               {i != 0 && (
-                <div className="border-t border-2 border-border rounded-full my-1" />
+                <div className="border-t border border-border rounded-full my-1" />
               )}
               <MenuItem>
-                <button
-                  onClick={() => {
-                    setResult(item.result);
-                    setSubmittedEssay(item.essay);
-                    setHistoryItems(
-                      JSON.parse(localStorage.getItem("results") || "[]"),
-                    );
-                  }}
-                  className={`w-full text-center px-3 py-2 my-0.5 text-sm transition-colors rounded-2xl ${
-                    item.result.task_achievement === result?.task_achievement
-                      ? "text-text bg-primary/60 font-semibold"
-                      : "text-text/80 hover:text-text hover:bg-primary/60"
+                <div
+                  className={`w-full flex items-center gap-1 px-3 py-1 my-0.5 text-sm transition-colors rounded-2xl ${
+                    item.essay === submittedEssay
+                      ? "bg-primary/60 font-semibold"
+                      : "hover:text-text hover:bg-primary/60"
                   }`}
                 >
-                  {item.question}
-                </button>
+                  <button
+                    onClick={() => {
+                      setResult(item.result);
+                      setSubmittedEssay(item.essay);
+                    }}
+                    className="flex-1 min-w-0 flex items-center gap-3 text-left"
+                  >
+                    <span
+                      className="flex-shrink-0 w-8 text-center font-semibold"
+                      style={{ color: getBandColor(item.result.overall_band) }}
+                    >
+                      {item.result.overall_band}
+                    </span>
+                    <span className="line-clamp-1 text-text flex-1 min-w-0 text-left">
+                      {item.essay}
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(i);
+                    }}
+                    className="flex-shrink-0 p-1 text-slate-500 hover:text-red-400 transition-colors"
+                    title="Delete"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </MenuItem>
             </div>
           ))

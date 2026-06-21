@@ -74,15 +74,20 @@ export default function Home() {
 
       const parsed: HistoryItem[] = existing ? JSON.parse(existing) : [];
 
-      const newItem: HistoryItem = {
-        question: data.question,
-        essay: data.essay,
-        result: response,
-      };
+      // skip saving if this exact essay is already in history
+      const alreadyExists = parsed.some((item) => item.essay === data.essay);
 
-      parsed.push(newItem);
+      if (!alreadyExists) {
+        const newItem: HistoryItem = {
+          question: data.question,
+          essay: data.essay,
+          result: response,
+        };
 
-      localStorage.setItem("results", JSON.stringify(parsed));
+        parsed.push(newItem);
+
+        localStorage.setItem("results", JSON.stringify(parsed));
+      }
     } catch (err: unknown) {
       let message = (err as { response?: { data?: { detail?: string } } })
         ?.response?.data?.detail;
@@ -119,6 +124,7 @@ export default function Home() {
           result={result}
           setResult={setResult}
           setSubmittedEssay={setSubmittedEssay}
+          submittedEssay={submittedEssay}
         />
       )}
       {/* ---- Main ---- */}
@@ -162,6 +168,7 @@ export default function Home() {
                         title={t.chatTitle}
                         provider={selectedProvider}
                         model={selectedModel}
+                        api_key={apiKey}
                       />
                     </div>
                   </>
