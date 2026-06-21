@@ -2,6 +2,7 @@
 
 import { CriterionScore } from "@/app/types";
 import ReactMarkdown from "react-markdown";
+import BorderGlow from "./BorderGlow";
 
 interface CriterionCardProps {
   title: string;
@@ -36,7 +37,18 @@ export default function CriterionCard({
   const barWidth = `${(data.score / 9) * 100}%`;
 
   return (
-    <div className="bg-foreground/70 rounded-xl border-2 border-border/40 p-4 space-y-3 hover:border-primary transition-color">
+    <BorderGlow
+      edgeSensitivity={41}
+      glowColor="40 80 80"
+      borderRadius={20}
+      backgroundColor="#261712"
+      glowRadius={50}
+      glowIntensity={1.4}
+      coneSpread={30}
+      animated
+      colors={["#a96851", "#85341b", "#915b4a"]}
+      className=" p-4 "
+    >
       {/* ---- Header ---- */}
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs font-semibold text-text uppercase tracking-wide flex-1 min-w-0 truncate">
@@ -61,6 +73,6 @@ export default function CriterionCard({
       <div className="text-xs text-text/70 leading-relaxed prose prose-invert prose-xs max-w-none">
         <ReactMarkdown>{data.feedback}</ReactMarkdown>
       </div>
-    </div>
+    </BorderGlow>
   );
 }

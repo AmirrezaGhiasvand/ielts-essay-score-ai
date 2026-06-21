@@ -71,7 +71,7 @@ const ResultsPanel = ({
           >
             {/* Criterion cards */}
             <div
-              className={`grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-hidden transition-[max-height,opacity] duration-350 ease-in-out max-h-150 opacity-100
+              className={`grid grid-cols-1 sm:grid-cols-2 gap-4 transition-[max-height,opacity] duration-350 ease-in-out max-h-150 opacity-100 p-3
                                   `}
             >
               <CriterionCard
