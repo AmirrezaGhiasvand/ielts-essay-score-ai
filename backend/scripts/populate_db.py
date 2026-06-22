@@ -12,8 +12,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
 # -------- Settings --------
 
-_default_chroma_path = "/data/chroma_db" if os.getenv("ENVIRONMENT") == "production" else "./chroma_db"
-CHROMA_DB_PATH       = os.getenv("CHROMA_DB_PATH", _default_chroma_path)
+CHROMA_DB_PATH       = os.getenv("CHROMA_DB_PATH", "./chroma_db")
 CHROMA_COLLECTION    = os.getenv("CHROMA_COLLECTION_NAME", "ielts_essays")
 EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "huggingface")  # "huggingface" or "ollama"
 EMBEDDING_MODEL     = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
