@@ -169,6 +169,7 @@ export default function DraggableTimer({
     shadow-[0_0_20px_rgba(255,255,255,0.08),0_0_40px_rgba(255,255,255,0.05)]
     ring-1 ring-text/30
   "
+      dir="ltr"
     >
       <Timer setTestExamMode={setTestExamMode} />
     </div>

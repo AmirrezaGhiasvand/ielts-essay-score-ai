@@ -94,7 +94,7 @@ const MainHeader = ({
             <Menu>
               <MenuButton
                 onClick={() => setLangOpen(!langOpen)}
-                className="flex items-center justify-center gap-1 text-sm text-text md:w-full w-[75vw] hover:text-white bg-primary/20 border-2 border-border hover:border-primary hover:bg-primary rounded-lg px-4! py-2! transition-colors focus:outline-none duration-250 focus:ring-0 focus-visible:outline-none"
+                className="flex items-center justify-center gap-1 text-sm text-text md:w-full w-[75vw] hover:text-white bg-primary/20 border-2 border-border hover:border-primary hover:bg-primary rounded-lg px-4! py-2! transition-colors focus:outline-none duration-250 focus:ring-0 focus-visible:outline-none whitespace-nowrap"
               >
                 {t.apiKey}
                 <ChevronDown size={11} />

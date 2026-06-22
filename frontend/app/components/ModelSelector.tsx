@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ChevronDown, Monitor, Cloud, Loader2 } from "lucide-react";
 import { getModels, ModelOption, ModelsResponse } from "@/app/lib/api";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { useLanguageContext } from "../contexts/LangaugeContext";
 
 interface ModelSelectorProps {
   onModelChange: (provider: string, modelId: string) => void;
@@ -18,6 +19,7 @@ export default function ModelSelector({
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<ModelOption | null>(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguageContext();
 
   // ---- Fetch models on mount ----
   useEffect(() => {
@@ -53,9 +55,9 @@ export default function ModelSelector({
 
   if (loading) {
     return (
-      <div className="flex px-4! py-2! items-center gap-2 text-sm text-text/60 border border-border rounded-lg">
+      <div className="flex items-center justify-center gap-2 md:text-sm md:w-full w-[75vw] text-text hover:text-white bg-muted border-2 border-border hover:border-primary hover:bg-primary rounded-lg px-4! py-2! transition-colors focus:outline-none duration-250 focus:ring-0 focus-visible:outline-none whitespace-nowrap">
         <Loader2 size={11} className="animate-spin" />
-        <span>Loading models...</span>
+        <span>{t.modelLoading}</span>
       </div>
     );
   }
@@ -64,7 +66,7 @@ export default function ModelSelector({
     <Menu>
       <MenuButton
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-center gap-2 md:text-sm md:w-full w-[75vw] text-text hover:text-white bg-primary/20 border-2 border-border hover:border-primary hover:bg-primary rounded-lg px-4! py-2! transition-colors focus:outline-none duration-250 focus:ring-0 focus-visible:outline-none"
+        className="flex items-center justify-center gap-2 md:text-sm md:w-full w-[75vw] text-text hover:text-white bg-primary/20 border-2 border-border hover:border-primary hover:bg-primary rounded-lg px-4! py-2! transition-colors focus:outline-none duration-250 focus:ring-0 focus-visible:outline-none whitespace-nowrap"
       >
         {selected?.provider === "ollama" ? (
           <Monitor size={13} className="text-text" />
@@ -72,7 +74,7 @@ export default function ModelSelector({
           <Cloud size={13} className="text-text" />
         )}
         <span className="max-w-35 truncate">
-          {selected?.name ?? "Select model"}
+          {selected?.name ?? t.selectModel}
         </span>
         <ChevronDown size={11} />
       </MenuButton>
