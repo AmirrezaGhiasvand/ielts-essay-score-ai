@@ -62,6 +62,10 @@ export default function Chat({
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    setHistory([]);
+  }, [essay]);
+
   async function handleSend() {
     if (!message.trim() || loading) return;
 

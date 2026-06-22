@@ -13,6 +13,7 @@ import { useLanguageContext } from "./contexts/LangaugeContext";
 import MainForm from "./components/MainForm";
 import { EssayFormData, formSchema } from "./lib/form";
 import ApiKeyInput from "./components/ApiKeyInput";
+import DraggableTimer from "./components/DraggableTimer";
 
 // -------- Page --------
 export default function Home() {
@@ -190,7 +191,7 @@ export default function Home() {
             </div>
           )
         ) : (
-          <div className="h-[calc(100vh-75px)] flex justify-center items-center">
+          <div className="h-[calc(100vh-91px)] flex justify-center items-center">
             <ApiKeyInput
               onSave={(key: string) => {
                 console.log("API Key:", key);

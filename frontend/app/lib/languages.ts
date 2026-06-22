@@ -50,10 +50,10 @@ export const UI_TEXT = {
     paste: "Paste",
     examTopic: "Enter Test Exam Mode",
     loading: [
-      "Loading Models...",
-      "Evaluating Essay...",
-      "Finding Errors...",
-      "Preparing The Results...",
+      "Loading Models ...",
+      "Evaluating Essay ...",
+      "Finding Errors ...",
+      "Preparing The Results ...",
     ],
     ccard: "Criterion Cards",
     ehe: "Error Highlighted Essay",
@@ -61,6 +61,10 @@ export const UI_TEXT = {
     grammer: "Grammar",
     spelling: "Spelling",
     repetition: "Repetition",
+    history: "History",
+    historyEmpty: "There Is Nothing To Show!",
+    selectModel: "Select Model",
+    modelLoading: "Loading Models ...",
   },
   fa: {
     title: "نمره‌دهی مقاله آیلتس",
@@ -112,6 +116,10 @@ export const UI_TEXT = {
     grammer: "گرامر",
     spelling: "غلط املایی",
     repetition: "تکرار",
+    history: "تاریخچه",
+    historyEmpty: "موردی برای نمایش وجود ندارد!",
+    selectModel: "انتخاب مدل",
+    modelLoading: "بارگذاری مدل‌ها ...",
   },
 } as const;
 
