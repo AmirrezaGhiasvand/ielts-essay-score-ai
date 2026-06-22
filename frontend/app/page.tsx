@@ -13,6 +13,7 @@ import { useLanguageContext } from "./contexts/LangaugeContext";
 import MainForm from "./components/MainForm";
 import { EssayFormData, formSchema } from "./lib/form";
 import ApiKeyInput from "./components/ApiKeyInput";
+import DraggableTimer from "./components/DraggableTimer";
 
 // -------- Page --------
 export default function Home() {
