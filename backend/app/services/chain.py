@@ -2,7 +2,7 @@ import os
 import json
 import time
 from dotenv import load_dotenv
-from langchain_ollama import ChatOllama, OllamaEmbeddings
+# from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain_chroma import Chroma
@@ -23,14 +23,14 @@ load_dotenv()
 
 # -------- Settings --------
 
-OLLAMA_BASE_URL    = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL       = os.getenv("OLLAMA_MODEL", "mistral:7b")
+# OLLAMA_BASE_URL    = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+# OLLAMA_MODEL       = os.getenv("OLLAMA_MODEL", "mistral:7b")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_MODEL   = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
 PROVIDER           = os.getenv("PROVIDER", "openrouter")
 EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "huggingface")  # "huggingface" or "ollama"
 EMBEDDING_MODEL     = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-OLLAMA_EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
+# OLLAMA_EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
 CHROMA_DB_PATH         = os.getenv("CHROMA_DB_PATH", "./chroma_db")
 CHROMA_COLLECTION  = os.getenv("CHROMA_COLLECTION_NAME", "ielts_essays")
 
@@ -61,7 +61,7 @@ def get_embeddings():
     if _embeddings is None:
         if EMBEDDING_PROVIDER == "ollama":
             print("Initializing Ollama embedding model...")
-            _embeddings = OllamaEmbeddings(model=OLLAMA_EMBEDDING_MODEL)
+            # _embeddings = OllamaEmbeddings(model=OLLAMA_EMBEDDING_MODEL)
         else:
             print("Initializing HuggingFace embedding model (no API key needed)...")
             _embeddings = HuggingFaceEmbeddings(
@@ -432,8 +432,8 @@ def score_essay(
     # ---- Build and run chain ----
     # use JSON parsing for all providers — with_structured_output behaves
     # inconsistently across Ollama and OpenRouter
-    active_provider = provider or PROVIDER
-    model_name      = model or (OPENROUTER_MODEL if active_provider == "openrouter" else OLLAMA_MODEL)
+    active_provider = provider or PROVIDER 
+    model_name      = model or (OPENROUTER_MODEL) #if active_provider == "openrouter" else OLLAMA_MODEL
     print(f"Scoring essay with {model_name}...")
 
     llm   = get_llm(provider_override=provider, model_override=model, api_key_override=api_key)
