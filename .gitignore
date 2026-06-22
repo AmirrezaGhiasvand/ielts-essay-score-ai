@@ -16,8 +16,6 @@ env/
 .env
 .envrc
 
-# -------- ChromaDB --------
-backend/chroma_db/
 
 # -------- Raw data --------
 backend/data/raw/
