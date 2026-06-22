@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ielts-scorer-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PROVIDER
+        value: openrouter
+      - key: EMBEDDING_PROVIDER
+        value: huggingface
+      - key: EMBEDDING_MODEL
+        value: BAAI/bge-base-en-v1.5
+    disk:
+      name: chroma-db
+      mountPath: /data/chroma_db
+      sizeGB: 1

@@ -12,7 +12,8 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
 # -------- Settings --------
 
-CHROMA_DB_PATH       = os.getenv("CHROMA_DB_PATH", "./chroma_db")
+_default_chroma_path = "/data/chroma_db" if os.getenv("ENVIRONMENT") == "production" else "./chroma_db"
+CHROMA_DB_PATH       = os.getenv("CHROMA_DB_PATH", _default_chroma_path)
 CHROMA_COLLECTION    = os.getenv("CHROMA_COLLECTION_NAME", "ielts_essays")
 EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "huggingface")  # "huggingface" or "ollama"
 EMBEDDING_MODEL     = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
@@ -108,7 +109,11 @@ def populate():
 
     # ---- Connect to ChromaDB ----
     print(f"\nConnecting to ChromaDB at {CHROMA_DB_PATH}...")
-    embeddings = HuggingFaceEmbeddings(model=EMBEDDING_MODEL)
+    embeddings = HuggingFaceEmbeddings(
+        model_name=EMBEDDING_MODEL,
+        model_kwargs={"device": "cpu"},
+        encode_kwargs={"normalize_embeddings": True},
+    )
     vector_store = Chroma(
         collection_name=CHROMA_COLLECTION,
         embedding_function=embeddings,

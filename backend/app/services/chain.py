@@ -31,7 +31,8 @@ PROVIDER           = os.getenv("PROVIDER", "ollama")
 EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "huggingface")  # "huggingface" or "ollama"
 EMBEDDING_MODEL     = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 OLLAMA_EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
-CHROMA_DB_PATH     = os.getenv("CHROMA_DB_PATH", "./chroma_db")
+_default_chroma_path   = "/data/chroma_db" if os.getenv("ENVIRONMENT") == "production" else "./chroma_db"
+CHROMA_DB_PATH         = os.getenv("CHROMA_DB_PATH", _default_chroma_path)
 CHROMA_COLLECTION  = os.getenv("CHROMA_COLLECTION_NAME", "ielts_essays")
 
 # official IELTS minimum word counts

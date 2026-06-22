@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
 
     print("Checking vector store...")
     vector_store = get_vector_store()
-    count        = vector_store._collection.count()
+    count = vector_store._collection.count()
 
     if count == 0:
         print("Vector store is empty — populating now...")
@@ -69,10 +69,11 @@ app.include_router(router)
 
 if __name__ == "__main__":
     import uvicorn
+    APP_PORT = int(os.getenv("PORT", 8000))
+    APP_ENV  = os.getenv("ENVIRONMENT", "development")
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
         port=APP_PORT,
         reload=APP_ENV == "development",
-        # reload=True only in development — watches for file changes
     )
