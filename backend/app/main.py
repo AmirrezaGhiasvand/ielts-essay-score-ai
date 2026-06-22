@@ -18,20 +18,17 @@ APP_PORT = int(os.getenv("APP_PORT", 8000))
 # -------- Startup --------
 
 @asynccontextmanager
-async def lifespan(app: FastAPI): 
 
-    # ---- Check vector store ----
-    from app.services.chain import get_vector_store
-    from scripts.populate_db import populate
+async def lifespan(app: FastAPI):
 
-    # skip eager loading in production — load on first request to avoid OOM on startup
     if os.getenv("ENVIRONMENT") != "production":
         print("Checking vector store...")
+
         from app.services.chain import get_vector_store
         from scripts.populate_db import populate
 
         vector_store = get_vector_store()
-        count        = vector_store._collection.count()
+        count = vector_store._collection.count()
 
         if count == 0:
             print("Vector store is empty — populating now...")
@@ -41,6 +38,10 @@ async def lifespan(app: FastAPI):
             print(f"Vector store ready — {count} documents loaded.")
     else:
         print("Production environment — vector store will load on first request.")
+
+    yield
+
+    print("Shutting down...")
 
 
 # -------- App --------
