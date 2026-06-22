@@ -24,18 +24,23 @@ async def lifespan(app: FastAPI):
     from app.services.chain import get_vector_store
     from scripts.populate_db import populate
 
-    print("Checking vector store...")
-    vector_store = get_vector_store()
-    count = vector_store._collection.count()
+    # skip eager loading in production — load on first request to avoid OOM on startup
+    if os.getenv("ENVIRONMENT") != "production":
+        print("Checking vector store...")
+        from app.services.chain import get_vector_store
+        from scripts.populate_db import populate
 
-    if count == 0:
-        print("Vector store is empty — populating now...")
-        populate()
-        print("Vector store ready.")
+        vector_store = get_vector_store()
+        count        = vector_store._collection.count()
+
+        if count == 0:
+            print("Vector store is empty — populating now...")
+            populate()
+            print("Vector store ready.")
+        else:
+            print(f"Vector store ready — {count} documents loaded.")
     else:
-        print(f"Vector store ready — {count} documents loaded.")
-
-    yield
+        print("Production environment — vector store will load on first request.")
 
 
 # -------- App --------
