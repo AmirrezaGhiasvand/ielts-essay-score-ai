@@ -71,18 +71,18 @@ async def health():
 
 @router.get("/models")
 async def get_models():
-    ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-    ollama_models   = []
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(f"{ollama_base_url}/api/tags", timeout=3.0)
-            print(f"Ollama response status: {response.status_code}")
-            print(f"Ollama response body: {response.text[:500]}")
-            if response.status_code == 200:
-                data          = response.json()
-                ollama_models = [m["name"] for m in data.get("models", [])]
-    except Exception as e:
-        print(f"Ollama connection error: {e}")
+    # ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    # ollama_models   = []
+    # try:
+    #     async with httpx.AsyncClient() as client:
+    #         response = await client.get(f"{ollama_base_url}/api/tags", timeout=3.0)
+    #         print(f"Ollama response status: {response.status_code}")
+    #         print(f"Ollama response body: {response.text[:500]}")
+    #         if response.status_code == 200:
+    #             data          = response.json()
+    #             ollama_models = [m["name"] for m in data.get("models", [])]
+    # except Exception as e:
+    #     print(f"Ollama connection error: {e}")
 
     cloud_models = [
         {"id": "openai/gpt-4o-mini", "name": "GPT-4o Mini", "provider": "openrouter"},
@@ -90,9 +90,9 @@ async def get_models():
    
 
     return {
-        "current_provider": os.getenv("PROVIDER", "ollama"),
+        # "current_provider": os.getenv("PROVIDER", "ollama"),
         "current_model":    os.getenv("OLLAMA_MODEL", "mistral:7b") if os.getenv("PROVIDER", "ollama") == "ollama" else os.getenv("OPENROUTER_MODEL", ""),
-        "ollama_models":    [{"id": m, "name": m, "provider": "ollama"} for m in ollama_models],
+        # "ollama_models":    [{"id": m, "name": m, "provider": "ollama"} for m in ollama_models],
         "cloud_models":     cloud_models,
     }
 
