@@ -158,7 +158,7 @@ export default function Home() {
                     />
 
                     {/* ---- Chat panel ---- */}
-                    <div className="transition-all duration-300 w-full min-w-1/2 lg:sticky lg:top-20 lg:self-stretch lg:h-[calc(100vh-91px)] h-[calc(100vh-10px)] md:h-[calc(100vh-90px)] md:pb-0 pb-5">
+                    <div className="transition-all duration-300 min-w-1/2 lg:sticky lg:top-20 lg:self-stretch lg:h-[calc(100vh-91px)] h-[calc(100vh-10px)] md:h-[calc(100vh-90px)] md:pb-0 pb-5">
                       <Chat
                         essay={submittedEssay}
                         scoringResult={result}

@@ -40,7 +40,7 @@ const HistorySelector = ({
       <MenuItems
         anchor={{ to: "bottom end", gap: "8px" }}
         transition
-        className="p-2 bg-muted border border-border rounded-xl shadow-2xl z-30 md:w-96 w-[75vw] overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0 flex justify-center items-center"
+        className="p-2 bg-muted border border-border rounded-xl shadow-2xl z-30 md:w-96 w-[75vw] overflow-hidden focus:outline-none focus:ring-0 focus-visible:outline-none origin-top transition duration-200 ease-in-out data-closed:scale-95 data-closed:opacity-0 flex justify-center items-center flex-col"
       >
         {historyItems.length ? (
           historyItems.map((item, i) => (
@@ -64,7 +64,7 @@ const HistorySelector = ({
                     className="flex-1 min-w-0 flex items-center gap-3 text-left"
                   >
                     <span
-                      className="flex-shrink-0 w-7 text-lg text-center font-semibold bg-muted rounded-full"
+                      className="flex-shrink-0 w-10 py-1 text-[16px] text-center font-semibold bg-muted rounded-full"
                       style={{ color: getBandColor(item.result.overall_band) }}
                     >
                       {item.result.overall_band}
@@ -79,10 +79,10 @@ const HistorySelector = ({
                       e.stopPropagation();
                       handleDelete(i);
                     }}
-                    className="flex-shrink-0 p-1.5 text-text bg-muted rounded-full  hover:text-red-400 transition-colors"
+                    className="flex-shrink-0 p-1.5 text-text bg-muted rounded-full  hover:text-red-400 transition-colors cursor-pointer"
                     title="Delete"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={14} />
                   </button>
                 </div>
               </MenuItem>
