@@ -2,26 +2,22 @@ import os
 import sys
 import pandas as pd
 from dotenv import load_dotenv
-from langchain_chroma import Chroma
 from langchain_classic.schema import Document
-from langchain_huggingface import HuggingFaceEmbeddings
+
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
+# Import the factory — works for both local (ChromaDB) and deployed (Pinecone)
+from vector_store_factory import get_embeddings, get_fresh_vector_store, VECTOR_STORE_PROVIDER
+
 
 # -------- Settings --------
 
-CHROMA_DB_PATH       = os.getenv("CHROMA_DB_PATH", "./chroma_db")
-CHROMA_COLLECTION    = os.getenv("CHROMA_COLLECTION_NAME", "ielts_essays")
-EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "huggingface")  # "huggingface" or "ollama"
-EMBEDDING_MODEL     = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-OLLAMA_EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
 CLEANED_DATASET_PATH = os.path.join(os.path.dirname(__file__), "../data/cleaned_dataset.csv")
 TEST_SET_PATH        = os.path.join(os.path.dirname(__file__), "../data/test.csv")
 TRAIN_SET_PATH       = os.path.join(os.path.dirname(__file__), "../data/train.csv")
 
-# fixed seed for reproducibility — same split every time
 RANDOM_SEED = 42
 TEST_SIZE   = 50
 
@@ -29,14 +25,13 @@ TEST_SIZE   = 50
 # -------- Split dataset --------
 
 def split_dataset(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    # stratify by task_type to keep Task 1/2 balanced in both sets
+    """Stratified split keeping Task 1 / Task 2 balanced in both sets."""
     test_frames  = []
     train_frames = []
 
     for task_type, group in df.groupby("task_type"):
-        # number of test samples proportional to task type size
         n_test = round(TEST_SIZE * len(group) / len(df))
-        test_sample = group.sample(n=n_test, random_state=RANDOM_SEED)
+        test_sample  = group.sample(n=n_test, random_state=RANDOM_SEED)
         train_sample = group.drop(test_sample.index)
 
         test_frames.append(test_sample)
@@ -68,7 +63,6 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
                 "overall_band":     float(row["overall_band"]),
                 "question":         row["question"],
                 "examiner_comment": row["Examiner_Comment"].strip() if has_comment else "",
-                # flag so retrieval can distinguish quality tiers
                 "has_comment":      has_comment,
             }
         )
@@ -80,6 +74,9 @@ def build_documents(df: pd.DataFrame) -> list[Document]:
 # -------- Populate --------
 
 def populate():
+    print(f"=== Populating vector store (provider: {VECTOR_STORE_PROVIDER.upper()}) ===\n")
+
+    # ---- Load dataset ----
     print("Loading cleaned dataset...")
     df = pd.read_csv(CLEANED_DATASET_PATH)
     print(f"Loaded {len(df)} essays")
@@ -90,13 +87,12 @@ def populate():
     print(f"Train: {len(train_df)} essays")
     print(f"Test:  {len(test_df)} essays")
 
-    # save splits to disk for evaluate.py to use later
     train_df.to_csv(TRAIN_SET_PATH, index=False)
     test_df.to_csv(TEST_SET_PATH, index=False)
     print(f"\n✅ Saved train.csv ({len(train_df)} rows)")
     print(f"✅ Saved test.csv  ({len(test_df)} rows)")
 
-    # ---- Build documents from train only ----
+    # ---- Build documents from train split only ----
     print("\nBuilding documents...")
     documents = build_documents(train_df)
 
@@ -106,30 +102,13 @@ def populate():
     print(f"  {without_comments} essays with band score only")
     print(f"  {len(documents)} total documents")
 
-    # ---- Connect to ChromaDB ----
-    print(f"\nConnecting to ChromaDB at {CHROMA_DB_PATH}...")
-    embeddings = HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL,
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True},
-    )
-    vector_store = Chroma(
-        collection_name=CHROMA_COLLECTION,
-        embedding_function=embeddings,
-        persist_directory=CHROMA_DB_PATH,
-    )
-
-    # clear existing collection to avoid duplicates on re-run
-    print("Clearing existing collection...")
-    vector_store.delete_collection()
-    vector_store = Chroma(
-        collection_name=CHROMA_COLLECTION,
-        embedding_function=embeddings,
-        persist_directory=CHROMA_DB_PATH,
-    )
+    # ---- Connect & clear old data ----
+    print("\nInitialising vector store...")
+    embeddings   = get_embeddings()
+    vector_store = get_fresh_vector_store(embeddings)   # clears existing data automatically
 
     # ---- Index in batches ----
-    print(f"Indexing {len(documents)} documents...")
+    print(f"\nIndexing {len(documents)} documents...")
     batch_size = 100
     for i in range(0, len(documents), batch_size):
         batch = documents[i : i + batch_size]

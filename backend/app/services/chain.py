@@ -2,10 +2,7 @@ import os
 import json
 import time
 from dotenv import load_dotenv
-# from langchain_ollama import ChatOllama, OllamaEmbeddings
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
-from langchain_chroma import Chroma
 from langchain_classic.prompts import ChatPromptTemplate
 from langchain_classic.schema import Document, HumanMessage, AIMessage
 from langchain_classic.schema.output_parser import StrOutputParser
@@ -18,21 +15,17 @@ from app.models.schemas import (
     SimilarEssay,
 )
 
+# Import shared factory — handles ChromaDB (local) vs Pinecone (deployed) automatically
+from scripts.vector_store_factory import get_embeddings, get_vector_store as _get_vector_store
+
 load_dotenv()
 
 
 # -------- Settings --------
 
-# OLLAMA_BASE_URL    = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-# OLLAMA_MODEL       = os.getenv("OLLAMA_MODEL", "mistral:7b")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_MODEL   = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
 PROVIDER           = os.getenv("PROVIDER", "openrouter")
-EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "huggingface")  # "huggingface" or "ollama"
-EMBEDDING_MODEL     = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-# OLLAMA_EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
-CHROMA_DB_PATH         = os.getenv("CHROMA_DB_PATH", "./chroma_db")
-CHROMA_COLLECTION  = os.getenv("CHROMA_COLLECTION_NAME", "ielts_essays")
 
 # official IELTS minimum word counts
 MIN_WORDS = {1: 150, 2: 250}
@@ -56,32 +49,20 @@ _embeddings   = None
 _vector_store = None
 
 
-def get_embeddings():
+def get_embeddings_singleton():
     global _embeddings
     if _embeddings is None:
-        if EMBEDDING_PROVIDER == "ollama":
-            print("Initializing Ollama embedding model...")
-            # _embeddings = OllamaEmbeddings(model=OLLAMA_EMBEDDING_MODEL)
-        else:
-            print("Initializing HuggingFace embedding model (no API key needed)...")
-            _embeddings = HuggingFaceEmbeddings(
-                model_name=EMBEDDING_MODEL,
-                model_kwargs={"device": "cpu"},
-                encode_kwargs={"normalize_embeddings": True},
-            )
+        _embeddings = get_embeddings()   # from factory
     return _embeddings
 
 
-def get_vector_store() -> Chroma:
+def get_vector_store_singleton():
     global _vector_store
     if _vector_store is None:
-        print("Connecting to ChromaDB...")
-        _vector_store = Chroma(
-            collection_name=CHROMA_COLLECTION,
-            embedding_function=get_embeddings(),
-            persist_directory=CHROMA_DB_PATH,
-        )
+        print("Connecting to vector store...")
+        _vector_store = _get_vector_store(get_embeddings_singleton())   # from factory
     return _vector_store
+
 
 # -------- Hybrid retrieval --------
 
@@ -92,7 +73,7 @@ def hybrid_retrieve(
     k:         int = 3,
 ) -> list[Document]:
 
-    vector_store = get_vector_store()
+    vector_store = get_vector_store_singleton()
 
     # ---- Step 1: Semantic search on essay ----
     essay_docs = vector_store.similarity_search(
@@ -121,7 +102,7 @@ def hybrid_retrieve(
         return []
 
     # ---- Step 4: BM25 on combined essay + question ----
-    query_text = f"{question} {essay}"
+    query_text       = f"{question} {essay}"
     tokenized_query  = query_text.lower().split()
     tokenized_corpus = [doc.page_content.lower().split() for doc in all_docs]
 
@@ -134,14 +115,14 @@ def hybrid_retrieve(
         bm25_scores = bm25_scores / bm25_max
 
     # ---- Step 5: Semantic scores via embeddings ----
-    embeddings    = get_embeddings()
+    embeddings    = get_embeddings_singleton()
     essay_vec     = embeddings.embed_query(essay)
     question_vec  = embeddings.embed_query(question)
     doc_vecs      = embeddings.embed_documents([d.page_content for d in all_docs])
 
     def cosine(a, b):
-        a, b   = np.array(a), np.array(b)
-        denom  = np.linalg.norm(a) * np.linalg.norm(b)
+        a, b  = np.array(a), np.array(b)
+        denom = np.linalg.norm(a) * np.linalg.norm(b)
         return float(np.dot(a, b) / denom) if denom > 0 else 0.0
 
     essay_scores    = [cosine(essay_vec, dv) for dv in doc_vecs]
@@ -177,12 +158,11 @@ def hybrid_retrieve(
 
     return selected
 
+
 def get_llm(provider_override: str = None, model_override: str = None, api_key_override: str = None):
     active_provider = provider_override or PROVIDER
 
-
     if active_provider == "openrouter":
-        # use the user's own API key if provided, otherwise fall back to server default
         key_to_use = api_key_override or OPENROUTER_API_KEY
         if api_key_override:
             print("Using OpenRouter cloud provider (user-provided API key)...")
@@ -199,7 +179,6 @@ def get_llm(provider_override: str = None, model_override: str = None, api_key_o
 # -------- Official IELTS rounding --------
 
 def official_ielts_round(score: float) -> float:
-    # official IELTS rounding rules:
     # .00      → x.0
     # .01–.24  → x.0  (round down)
     # .25–.74  → x.5  (round to .5)
@@ -231,12 +210,14 @@ def format_docs(docs: list[Document]) -> str:
             context += "No examiner comment available.\n"
     return context
 
+
 # -------- Build full context (RAG + few-shot examples) --------
 
 def build_context(docs: list[Document], task_type: int) -> str:
     rag_context      = format_docs(docs)
     few_shot_context = build_few_shot_context(task_type)
     return f"{few_shot_context}\n{rag_context}"
+
 
 # -------- Scoring prompt --------
 
@@ -318,7 +299,6 @@ Essay:
 ])
 
 
-
 # -------- Error detection prompt --------
 
 ERROR_DETECTION_PROMPT = ChatPromptTemplate.from_messages([
@@ -385,7 +365,6 @@ def detect_text_errors(essay: str, provider: str = None, model: str = None, api_
         return []
 
 
-
 # -------- Score essay --------
 
 def score_essay(
@@ -418,7 +397,6 @@ def score_essay(
         )
 
     # ---- Hybrid RAG retrieval ----
-    # combines essay semantic + question semantic + BM25 keyword search
     print(f"Retrieving similar essays for Task {task_type}...")
     similar_docs = hybrid_retrieve(
         essay=essay,
@@ -428,12 +406,10 @@ def score_essay(
     )
     context = build_context(similar_docs, task_type)
     print(f"Found {len(similar_docs)} similar essays")
-    
+
     # ---- Build and run chain ----
-    # use JSON parsing for all providers — with_structured_output behaves
-    # inconsistently across Ollama and OpenRouter
-    active_provider = provider or PROVIDER 
-    model_name      = model or (OPENROUTER_MODEL) #if active_provider == "openrouter" else OLLAMA_MODEL
+    active_provider = provider or PROVIDER
+    model_name      = model or OPENROUTER_MODEL
     print(f"Scoring essay with {model_name}...")
 
     llm   = get_llm(provider_override=provider, model_override=model, api_key_override=api_key)
@@ -458,7 +434,7 @@ def score_essay(
     result = LLMScoringOutput(**data)
 
     # ---- Calculate overall band ----
-    raw_average  = (
+    raw_average = (
         result.task_achievement.score +
         result.coherence_cohesion.score +
         result.lexical_resource.score +
@@ -480,7 +456,7 @@ def score_essay(
         for doc in similar_docs
     ]
 
-        # ---- Detect text errors (separate LLM call) ----
+    # ---- Detect text errors (separate LLM call) ----
     text_errors = detect_text_errors(essay, provider=provider, model=model, api_key=api_key)
 
     # ---- Final latency including error detection ----
@@ -544,8 +520,6 @@ def chat_about_essay(
     language_name = LANGUAGE_MAP.get(language, "English")
     llm = get_llm(provider_override=provider, model_override=model, api_key_override=api_key)
 
-    # ---- Build messages with history ----
-    # model has no memory — pass full history every time
     messages = CHAT_PROMPT.format_messages(
         language=language_name,
         essay=essay,
@@ -568,12 +542,12 @@ def chat_about_essay(
         if msg["role"] == "user":
             final_messages.append(HumanMessage(content=msg["content"]))
         else:
-            # AIMessage for assistant history
             final_messages.append(AIMessage(content=msg["content"]))
     final_messages.append(messages[-1])  # current human message
 
     response = llm.invoke(final_messages)
     return response.content.strip()
+
 
 # -------- Follow-up chat (streaming) --------
 
@@ -588,7 +562,7 @@ def chat_about_essay_stream(
     api_key:        str = None,
 ):
     language_name = LANGUAGE_MAP.get(language, "English")
-    llm            = get_llm(provider_override=provider, model_override=model, api_key_override=api_key)
+    llm           = get_llm(provider_override=provider, model_override=model, api_key_override=api_key)
 
     messages = CHAT_PROMPT.format_messages(
         language=language_name,
