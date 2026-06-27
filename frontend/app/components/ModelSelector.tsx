@@ -29,8 +29,8 @@ export default function ModelSelector({
           const data = await getModels();
           setModels(data);
 
-          // set current model as selected
-          const allModels = [...data.ollama_models, ...data.cloud_models];
+          // set current model as selected local =...data.ollama_models,
+          const allModels = [...data.cloud_models];
           const current = allModels.find(
             (m) =>
               m.id === data.current_model &&
@@ -86,7 +86,7 @@ export default function ModelSelector({
         >
           {models && (
             <>
-              {/* ---- Local models ---- */}
+              {/* ---- Local models ----
               {models.ollama_models.length > 0 && (
                 <>
                   <div className="px-3 py-2 border-b border-border flex items-center gap-2">
@@ -116,7 +116,7 @@ export default function ModelSelector({
                       </MenuItem>
                     ))}
                 </>
-              )}
+              )} */}
 
               {/* ---- Cloud models ---- */}
               {models.cloud_models.length > 0 && (

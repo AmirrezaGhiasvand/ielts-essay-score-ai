@@ -91,7 +91,7 @@ async def get_models():
 
     return {
         # "current_provider": os.getenv("PROVIDER", "ollama"),
-        "current_model":    os.getenv("OLLAMA_MODEL", "mistral:7b") if os.getenv("PROVIDER", "ollama") == "ollama" else os.getenv("OPENROUTER_MODEL", ""),
+        # "current_model":    os.getenv("OLLAMA_MODEL", "mistral:7b") if os.getenv("PROVIDER", "ollama") == "ollama" else os.getenv("OPENROUTER_MODEL", ""),
         # "ollama_models":    [{"id": m, "name": m, "provider": "ollama"} for m in ollama_models],
         "cloud_models":     cloud_models,
     }

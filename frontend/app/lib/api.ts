@@ -70,7 +70,7 @@ export interface ModelOption {
 export interface ModelsResponse {
   current_provider: string;
   current_model: string;
-  ollama_models: ModelOption[];
+  // ollama_models: ModelOption[];
   cloud_models: ModelOption[];
 }
 
