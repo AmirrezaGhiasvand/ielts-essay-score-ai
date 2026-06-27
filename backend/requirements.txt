@@ -6,6 +6,10 @@ uvicorn[standard]==0.29.0
 pandas==2.2.2
 pydantic>=2.7,<3
 
+# Vector Database — Pinecone (production)
+pinecone-client
+langchain-pinecone
+
 # Vector Database
 chromadb==0.5.23
 
@@ -13,7 +17,13 @@ chromadb==0.5.23
 rank-bm25==0.2.2
 
 # Embeddings
-sentence-transformers==3.3.1
+#sentence-transformers==3.3.1
+
+# Embeddings — fastembed is lightweight (~50MB), no PyTorch required
+# Drop-in replacement for sentence-transformers on memory-constrained servers
+fastembed==0.4.2
+
+
 
 # LangChain
 langchain

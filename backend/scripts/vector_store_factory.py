@@ -52,10 +52,6 @@ PINECONE_EMBEDDING_DIM  = int(os.getenv("PINECONE_EMBEDDING_DIM", "384"))
 # ------------------------------------------------------------------ #
 
 def get_embeddings():
-    """
-    Return an embedding object based on EMBEDDING_PROVIDER.
-    Supports 'huggingface' and 'ollama'.
-    """
     if EMBEDDING_PROVIDER == "ollama":
         from langchain_ollama import OllamaEmbeddings
         return OllamaEmbeddings(
@@ -63,13 +59,9 @@ def get_embeddings():
             base_url=OLLAMA_BASE_URL,
         )
 
-    # Default: HuggingFace
-    from langchain_huggingface import HuggingFaceEmbeddings
-    return HuggingFaceEmbeddings(
-        model_name=EMBEDDING_MODEL,
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": True},
-    )
+    # Default: FastEmbed — lightweight, no PyTorch, ~50MB vs ~500MB
+    from langchain_community.embeddings import FastEmbedEmbeddings
+    return FastEmbedEmbeddings(model_name=EMBEDDING_MODEL)
 
 
 # ------------------------------------------------------------------ #
