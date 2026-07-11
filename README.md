@@ -1,3 +1,9 @@
+
+
+
+
+
+
 # IELTS Essay Scorer
 
 An AI-powered IELTS Writing Task 2 essay scorer that combines retrieval-augmented generation (RAG) with large language models to provide IELTS band scores, detailed per-criterion feedback, inline error highlighting, and an interactive chat for follow-up questions — all in a clean, multilingual, dark-mode interface.
@@ -8,9 +14,9 @@ An AI-powered IELTS Writing Task 2 essay scorer that combines retrieval-augmente
 
 ## 🎥 Demo
 
-> _Video walkthrough coming soon — placeholder for a screen recording demoing the full flow: submitting an essay, viewing band scores, exploring error highlights, and chatting with the AI examiner._
+> _Video walkthrough : submitting an essay, viewing band scores, exploring error highlights, and chatting with the AI examiner.
+https://github.com/user-attachments/assets/a231384f-eb26-4f38-b4d7-a9ccf5bb2e89
 
-[![Demo Video Placeholder](https://via.placeholder.com/800x450.png?text=Demo+Video+Coming+Soon)](#)
 
 ---
 
